@@ -69,7 +69,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <label for="ktm" class="block mb-2 font-semibold">KTM</label>
                 <input type="file" name="ktm" id="ktm" class="p-6 rounded shadow border bg-blue w-full">
             </div>
-            <button type="submit" class="py-4 w-full border shadow rounded font-semibold">Register</button>
+            <button type="submit" class="mb-6 py-4 w-full border shadow rounded font-semibold">Register</button>
+            <div class="text-center w-full">
+                <a href="login.php">Have a account? <span class="p-1 bg-light-blue">Log in</span></a>
+            </div>
         </form>
     </section>
 </body>
