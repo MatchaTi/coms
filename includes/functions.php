@@ -48,4 +48,38 @@ function register($nim, $username, $email, $password, $ktm)
         ];
     }
 }
+
+function login($nim, $password)
+{
+    global $conn;
+
+    $sql = "SELECT nim, username, password, photo, role FROM users WHERE nim='$nim'";
+    $result = $conn->query($sql);
+    if ($result->num_rows == 0) {
+        return [
+            "status" => false,
+            "message" => "NIM tidak terdaftar"
+        ];
+    }
+
+    $user = $result->fetch_assoc();
+
+    if (!password_verify($password, $user['password'])) {
+        return [
+            "status" => false,
+            "message" => "Password salah"
+        ];
+    }
+
+    return [
+        "status" => true,
+        "message" => "Login berhasil",
+        "data" => [
+            "nim" => $user['nim'],
+            "username" => $user['username'],
+            "photo" => $user['photo'],
+            "role" => $user['role']
+        ]
+    ];
+}
 ?>
