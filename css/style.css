@@ -1,0 +1,10 @@
+@media (min-width: 768px) {
+  .form-auth {
+    max-width: 35vw;
+  }
+
+  .hero-paragraph {
+    max-width: 400px;
+    width: 400px;
+  }
+}

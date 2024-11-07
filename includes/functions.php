@@ -6,6 +6,20 @@ function register($nim, $username, $email, $password, $ktm)
 {
     global $conn;
 
+    if (strlen($nim) < 10) {
+        return [
+            "status" => false,
+            "message" => "NIM harus 10 karakter"
+        ];
+    }
+
+    if (strlen($password) < 4) {
+        return [
+            "status" => false,
+            "message" => "Password minimal 4 karakter"
+        ];
+    }
+
     $sql = "SELECT * FROM users WHERE nim='$nim'";
     $result = $conn->query($sql);
     if ($result->num_rows > 0) {

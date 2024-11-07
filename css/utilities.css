@@ -37,6 +37,23 @@ body {
   font-size: 16px;
   background: var(--background-color) url(../assets/photos/grid-pattern.png);
   color: var(--black);
+  padding: 16px;
+}
+
+input::placeholder {
+  color: var(--black);
+}
+
+textarea {
+  resize: none;
+}
+
+textarea::placeholder {
+  color: var(--black);
+}
+
+button {
+  cursor: pointer;
 }
 
 /* colors start */
@@ -115,6 +132,50 @@ body {
   font-weight: 400;
   line-height: 16px;
 }
+
+.font-bold {
+  font-weight: 700;
+}
+
+.font-semibold {
+  font-weight: 600;
+}
+
+.leading-none {
+  line-height: 1;
+}
+
+.leading-tight {
+  line-height: 1.25;
+}
+
+.leading-snug {
+  line-height: 1.375;
+}
+
+.leading-normal {
+  line-height: 1.5;
+}
+
+.leading-relaxed {
+  line-height: 1.625;
+}
+
+.leading-loose {
+  line-height: 2;
+}
+
+.text-center {
+  text-align: center;
+}
+
+.text-left {
+  text-align: left;
+}
+
+.text-right {
+  text-align: right;
+}
 /* typography end */
 
 /* display start */
@@ -122,8 +183,16 @@ body {
   display: none;
 }
 
+.block {
+  display: block;
+}
+
 .flex {
   display: flex;
+}
+
+.flex-wrap {
+  flex-wrap: wrap;
 }
 
 .flex-column {
@@ -487,17 +556,17 @@ body {
 
 /* shadow start */
 .shadow {
-  box-shadow: 2px 2px 0 #000;
+  box-shadow: -1px 2px 0 #000;
 }
 /* shadow end */
 
 /* border start */
 .border {
-  border: 2px solid #000;
+  border: 3px solid #000;
 }
 
 .border-b {
-  border-bottom: 2px solid #000;
+  border-bottom: 3px solid #000;
 }
 /* border end */
 
