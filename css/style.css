@@ -1,3 +1,22 @@
+.navbar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  flex-direction: row;
+  justify-content: center;
+  padding: 12px 0;
+  border-top: 3px solid var(--black);
+}
+
+.nav-options {
+  flex-direction: row;
+}
+
+.nav-mobile {
+  display: none;
+}
+
 @media (min-width: 768px) {
   .form-auth {
     max-width: 35vw;
@@ -6,5 +25,24 @@
   .hero-paragraph {
     max-width: 400px;
     width: 400px;
+  }
+
+  .navbar {
+    top: 0;
+    left: 0;
+    right: auto;
+    border-top: 0;
+    border-right: 3px solid var(--black);
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 0;
+  }
+
+  .nav-options {
+    flex-direction: column;
+  }
+
+  .nav-mobile {
+    display: block;
   }
 }
