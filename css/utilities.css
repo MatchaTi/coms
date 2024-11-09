@@ -1,7 +1,7 @@
 @import url("https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,100..900;1,100..900&display=swap");
 
 :root {
-  --background-color: #ece6c2;
+  --cream: #ece6c2;
   --black: #000;
   --light-blue: #daf5f0;
   --blue: #87ceeb;
@@ -35,9 +35,11 @@
 body {
   font-family: "Archivo", sans-serif;
   font-size: 16px;
-  background: var(--background-color) url(../assets/photos/grid-pattern.png);
+  background: var(--cream) url(../assets/photos/grid-pattern.png);
   color: var(--black);
   padding: 16px;
+  max-width: 856px;
+  margin: auto;
 }
 
 input::placeholder {
@@ -62,6 +64,14 @@ a {
 }
 
 /* colors start */
+.bg-cream {
+  background-color: var(--cream);
+}
+
+.bg-black {
+  background-color: var(--black);
+}
+
 .bg-light-blue {
   background-color: var(--light-blue);
 }
@@ -638,6 +648,10 @@ a {
   width: 48px;
 }
 
+.w-15 {
+  width: 60px;
+}
+
 .h-1 {
   height: 4px;
 }
@@ -684,6 +698,10 @@ a {
 
 .h-12 {
   height: 48px;
+}
+
+.h-15 {
+  height: 60px;
 }
 
 .w-full {

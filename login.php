@@ -3,9 +3,9 @@ include 'includes/functions.php';
 
 session_start();
 
-if (isset($_SESSION['user'])) {
-    header('Location: index.php');
-}
+// if (isset($_SESSION['user'])) {
+//     header('Location: index.php');
+// }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nim = htmlspecialchars($_POST['nim']);
@@ -36,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 </head>
 
 <body class="w-screen h-screen flex items-center justify-center">
-    <section class="w-full flex flex-wrap items-center justify-center gap-12">
+    <section class="container-auth w-full flex items-center justify-center gap-12">
         <div>
             <h1 class="heading-1">Coms</h1>
             <p class="hero-paragraph leading-relaxed">Coms helps you connect and share with students, lecturers, and the community at Mulawarman University, strengthening connections and collaboration in the academic environment.</p>
@@ -49,7 +49,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             </div>
             <div class="mb-6">
                 <label for="password" class="block mb-2 font-semibold">Password</label>
-                <input type="password" name="password" id="password" class="p-6 rounded shadow border bg-purple w-full" placeholder="Min 4 characters" required>
+                <input type="password" name="password" id="password" class="p-6 rounded shadow border bg-pink w-full" placeholder="Min 4 characters" required>
             </div>
             <button type="submit" class="mb-6 py-4 w-full border shadow rounded font-semibold">Login</button>
             <div class="text-center w-full">

@@ -1,3 +1,14 @@
+.photo-profile {
+  object-fit: cover;
+  overflow: hidden;
+  min-width: 60px;
+}
+
+.photo-profile img {
+  width: 100%;
+  height: 100%;
+}
+
 .navbar {
   position: fixed;
   bottom: 0;
@@ -17,9 +28,14 @@
   display: none;
 }
 
+.container-auth {
+  display: flex;
+  flex-direction: column;
+}
+
 @media (min-width: 768px) {
   .form-auth {
-    max-width: 35vw;
+    min-width: 35vw;
   }
 
   .hero-paragraph {
@@ -44,5 +60,9 @@
 
   .nav-mobile {
     display: block;
+  }
+
+  .container-auth {
+    flex-direction: row;
   }
 }
