@@ -14,7 +14,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $result = login($nim, $password);
     if ($result['status']) {
         echo "<script>alert('" . $result['message'] . "')</script>";
-        header('Location: login.php');
+        if ($result['data']['role'] == 'admin') {
+            header('Location: admin.php');
+            exit();
+        }
+        header('Location: index.php');
     } else {
         echo "<script>alert('" . $result['message'] . "')</script>";
     }

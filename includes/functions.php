@@ -1,7 +1,6 @@
 <?php
 include 'connection.php';
 
-
 function register($nim, $username, $email, $password, $ktm)
 {
     global $conn;
@@ -10,13 +9,6 @@ function register($nim, $username, $email, $password, $ktm)
         return [
             "status" => false,
             "message" => "NIM harus 10 karakter"
-        ];
-    }
-
-    if (strlen($password) < 4) {
-        return [
-            "status" => false,
-            "message" => "Password minimal 4 karakter"
         ];
     }
 
@@ -47,8 +39,48 @@ function register($nim, $username, $email, $password, $ktm)
         ];
     }
 
+    if (strlen($password) < 4) {
+        return [
+            "status" => false,
+            "message" => "Password minimal 4 karakter"
+        ];
+    }
+
+    $ktmPath = null;
+
+    if (empty($ktm['name'])) {
+        return [
+            "status" => false,
+            "message" => "KTM harus diupload"
+        ];
+    }
+
+    if ($ktm['error'] == UPLOAD_ERR_OK) {
+        $ktmCheck = checkValidPhoto($ktm);
+        if (!$ktmCheck['status']) {
+            return $ktmCheck;
+        }
+
+        $fileExtention = pathinfo($ktm['name'], PATHINFO_EXTENSION);
+        $uniqueName = uniqid("ktm_", true) . '.' . $fileExtention;
+        $uploadDir = 'uploads/ktm/';
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        $ktmPath = $uploadDir . $uniqueName;
+
+        if (!move_uploaded_file($ktm['tmp_name'], $ktmPath)) {
+            return [
+                "status" => false,
+                "message" => "Gagal mengupload KTM"
+            ];
+        }
+    }
+
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-    $sql = "INSERT INTO users (nim, username, email, password, ktm) VALUES ('$nim', '$username', '$email', '$passwordHash', '$ktm')";
+    $sql = "INSERT INTO users (nim, username, email, password, ktm) VALUES ('$nim', '$username', '$email', '$passwordHash', '$ktmPath')";
     $result = $conn->query($sql);
     if ($result) {
         return [
@@ -67,7 +99,7 @@ function login($nim, $password)
 {
     global $conn;
 
-    $sql = "SELECT nim, username, password, photo, role FROM users WHERE nim='$nim'";
+    $sql = "SELECT nim, username, password, photo, role, status FROM users WHERE nim='$nim'";
     $result = $conn->query($sql);
     if ($result->num_rows == 0) {
         return [
@@ -85,6 +117,13 @@ function login($nim, $password)
         ];
     }
 
+    if (!$user['status']) {
+        return [
+            "status" => false,
+            "message" => "Akun belum aktif"
+        ];
+    }
+
     return [
         "status" => true,
         "message" => "Login berhasil",
@@ -94,6 +133,30 @@ function login($nim, $password)
             "photo" => $user['photo'],
             "role" => $user['role']
         ]
+    ];
+}
+
+function checkValidPhoto($imgFile)
+{
+    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+    if (!in_array($imgFile['type'], $allowedTypes)) {
+        return [
+            "status" => false,
+            "message" => "Only JPEG, PNG, and GIF images are allowed."
+        ];
+    }
+
+    $maxSize = 2 * 1024 * 1024; // 2MB
+    if ($imgFile['size'] > $maxSize) {
+        return [
+            "status" => false,
+            "message" => "Ukuran file maksimal 2MB"
+        ];
+    }
+
+    return [
+        "status" => true,
+        "message" => "Valid image."
     ];
 }
 ?>
