@@ -1,7 +1,7 @@
 <?php
 include 'connection.php';
 
-function register($nim, $username, $email, $password, $ktm)
+function register($nim, $username, $fullname, $email, $password, $ktm)
 {
     global $conn;
 
@@ -27,6 +27,15 @@ function register($nim, $username, $email, $password, $ktm)
         return [
             "status" => false,
             "message" => "Username sudah terdaftar"
+        ];
+    }
+
+    $sql = "SELECT * FROM users WHERE fullname='$fullname'";
+    $result = $conn->query($sql);
+    if ($result->num_rows > 0) {
+        return [
+            "status" => false,
+            "message" => "Nama lengkap sudah terdaftar"
         ];
     }
 
@@ -80,7 +89,7 @@ function register($nim, $username, $email, $password, $ktm)
     }
 
     $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-    $sql = "INSERT INTO users (nim, username, email, password, ktm) VALUES ('$nim', '$username', '$email', '$passwordHash', '$ktmPath')";
+    $sql = "INSERT INTO users (nim, username, fullname,email, password, ktm) VALUES ('$nim', '$username', '$fullname','$email', '$passwordHash', '$ktmPath')";
     $result = $conn->query($sql);
     if ($result) {
         return [
@@ -158,5 +167,86 @@ function checkValidPhoto($imgFile)
         "status" => true,
         "message" => "Valid image."
     ];
+}
+
+function getAllUsers()
+{
+    global $conn;
+
+    $sql = "SELECT * FROM users WHERE role = 'user' ORDER BY nim";
+    $result = $conn->query($sql);
+    $users = [];
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $users[] = [
+                "nim" => $row['nim'],
+                "username" => $row['username'],
+                "fullname" => $row['fullname'],
+                "email" => $row['email'],
+                "ktm" => $row['ktm'],
+                "photo" => $row['photo'],
+                "status" => $row['status']
+            ];
+        }
+    }
+
+    return $users;
+}
+
+function updateStatusUser($nim)
+{
+    global $conn;
+
+    $sql = "UPDATE users SET status = 1 WHERE nim = $nim";
+    $result = $conn->query($sql);
+    if ($result) {
+        return [
+            "status" => true,
+            "message" => "User berhasil diaktifkan"
+        ];
+    } else {
+        return [
+            "status" => false,
+            "message" => "User gagal diaktifkan"
+        ];
+    }
+}
+
+function rejectStatusUser($nim)
+{
+    global $conn;
+
+    $sql = "DELETE FROM users WHERE nim = $nim";
+    $result = $conn->query($sql);
+    if ($result) {
+        return [
+            "status" => true,
+            "message" => "User berhasil ditolak"
+        ];
+    } else {
+        return [
+            "status" => false,
+            "message" => "User gagal ditolak"
+        ];
+    }
+}
+
+function deleteUser($nim)
+{
+    global $conn;
+
+    $sql = "DELETE FROM users WHERE nim = $nim";
+    $result = $conn->query($sql);
+    if ($result) {
+        return [
+            "status" => true,
+            "message" => "User berhasil dihapus"
+        ];
+    } else {
+        return [
+            "status" => false,
+            "message" => "User gagal dihapus"
+        ];
+    }
 }
 ?>

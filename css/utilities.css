@@ -32,16 +32,6 @@
   transition: all 150ms ease-in-out;
 }
 
-body {
-  font-family: "Archivo", sans-serif;
-  font-size: 16px;
-  background: var(--cream) url(../assets/photos/grid-pattern.png);
-  color: var(--black);
-  padding: 16px;
-  max-width: 856px;
-  margin: auto;
-}
-
 input::placeholder {
   color: var(--black);
 }
@@ -204,6 +194,14 @@ a {
 
 .flex {
   display: flex;
+}
+
+.grid {
+  display: grid;
+}
+
+.grid-cols-4 {
+  grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
 .flex-wrap {
@@ -706,6 +704,10 @@ a {
 
 .w-full {
   width: 100%;
+}
+
+.w-auto {
+  width: auto;
 }
 
 .w-screen {

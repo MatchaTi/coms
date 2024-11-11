@@ -61,4 +61,4 @@ SELECT * FROM posts;
 INSERT INTO comments(content, user_nim, post_id) VALUES("Tailwind mantap!", "2309106065", 1);
 SELECT * FROM comments;
 
-delete from users;
+delete from users where nim = "2309106065";

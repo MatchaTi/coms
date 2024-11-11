@@ -11,13 +11,14 @@ session_start();
 // }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $nim = $_POST['nim'];
-    $username = $_POST['username'];
-    $email = $_POST['email'];
-    $password = $_POST['password'];
+    $nim = htmlspecialchars($_POST['nim']);
+    $username = htmlspecialchars($_POST['username']);
+    $fullname = htmlspecialchars($_POST['fullname']);
+    $email = htmlspecialchars($_POST['email']);
+    $password = htmlspecialchars($_POST['password']);
     $ktm = $_FILES['ktm'];
 
-    $result = register($nim, $username, $email, $password, $ktm);
+    $result = register($nim, $username, $fullname, $email, $password, $ktm);
     if ($result['status']) {
         echo "<script>alert('" . $result['message'] . "')</script>";
         header('Location: login.php');
@@ -56,6 +57,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="mb-6">
                 <label for="username" class="block mb-2 font-semibold">Username</label>
                 <input type="text" name="username" id="username" class="p-6 rounded shadow border bg-yellow w-full" placeholder="Ex: Fuyu" required>
+            </div>
+            <div class="mb-6">
+                <label for="fullname" class="block mb-2 font-semibold">Fullname</label>
+                <input type="text" name="fullname" id="fullname" class="p-6 rounded shadow border bg-yellow w-full" placeholder="Ex: Fuyu Fuyu" required>
             </div>
             <div class="mb-6">
                 <label for="email" class="block mb-2 font-semibold">Email</label>
