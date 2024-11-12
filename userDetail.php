@@ -50,7 +50,12 @@ $user = getSingleUser($nim);
                 </div>
             </div>
         </div>
-        <div>logout</div>
+        <a href="logout.php" class="flex gap-4 items-center" onclick="return confirm('Are you sure want to logout?')">
+            <div class="px-4 py-2 rounded-full border shadow bg-red">
+                <img src="assets/icons/logout.svg" alt="Logout">
+            </div>
+            <span class="font-semibold">Logout</span>
+        </a>
     </nav>
 
     <section>
@@ -58,7 +63,7 @@ $user = getSingleUser($nim);
         <div class="mb-10 p-6 grid grid-cols-2 gap-8 rounded border shadow w-full">
             <?php if ($user): ?>
                 <div>
-                    <h2 class="mb-6 heading-2">Profile</h2>
+                    <h2 class="mb-6 heading-2">KTM</h2>
                     <div class="ktm rounded shadow border">
                         <img src="<?= $user['ktm'] ?>" alt="KTM">
                     </div>
