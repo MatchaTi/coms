@@ -346,7 +346,7 @@ function addPost($userNIM, $title, $description, $category, $photo = null)
     }
 }
 
-function getAllPosts($pagination = false, $page = 1, $limit = 8)
+function getAllPosts($pagination = false, $page = 1, $limit = 4)
 {
     global $conn;
 
@@ -484,5 +484,25 @@ function getSinglePost($id)
             "counter_views" => $row['counter_views']
         ];
     }
+}
+
+function getTotalUsers()
+{
+    global $conn;
+
+    $sql = "SELECT COUNT(*) AS total FROM users WHERE role = 'user'";
+    $result = $conn->query($sql);
+    $row = $result->fetch_assoc();
+    return $row['total'];
+}
+
+function getTotalPosts()
+{
+    global $conn;
+
+    $sql = "SELECT COUNT(*) AS total FROM posts WHERE status = 1";
+    $result = $conn->query($sql);
+    $row = $result->fetch_assoc();
+    return $row['total'];
 }
 ?>
