@@ -3,9 +3,10 @@ include 'includes/functions.php';
 
 session_start();
 
-// if (isset($_SESSION['user'])) {
-//     header('Location: index.php');
-// }
+if (isset($_SESSION['user'])) {
+    header('Location: index.php');
+    exit();
+}
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nim = htmlspecialchars($_POST['nim']);
@@ -14,8 +15,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $result = login($nim, $password);
     if ($result['status']) {
         echo "<script>alert('" . $result['message'] . "')</script>";
+        $_SESSION['user'] = $result['data'];
         if ($result['data']['role'] == 'admin') {
-            $_SESSION['user'] = $result['data'];
             header('Location: admin.php');
             exit();
         }

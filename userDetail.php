@@ -8,13 +8,8 @@ if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     header('Location: login.php');
 }
 
-$page = isset($_GET['page']) ? $_GET['page'] : 1;
-$result = getAllUsers(true, $page);
-
-if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $name = $_POST['name'];
-    $result = searchUser($name);
-}
+$nim = isset($_GET['nim']) ? $_GET['nim'] : 0;
+$user = getSingleUser($nim);
 
 ?>
 
@@ -55,32 +50,49 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 </div>
             </div>
         </div>
-        <a href="logout.php" class="flex gap-4 items-center" onclick="return confirm('Are you sure want to logout?')">
-            <div class="px-4 py-2 rounded-full border shadow bg-red">
-                <img src="assets/icons/logout.svg" alt="Logout">
-            </div>
-            <span class="font-semibold">Logout</span>
-        </a>
+        <div>logout</div>
     </nav>
 
     <section>
         <h1 class="heading-2 mb-6">Manajemen User</h1>
-        <form action="" class="mb-6" method="POST">
-            <input type="text" name="name" class="p-6 rounded border shadow w-full" placeholder="Search users">
-        </form>
-        <div class="mb-10 p-6 grid grid-cols-4 gap-6 rounded border shadow w-full">
-            <?php if ($result): ?>
-                <?php foreach ($result as $user): ?>
-                    <div class="p-6 flex flex-column gap-6 justify-center items-center border shadow rounded">
-                        <a href="userDetail.php?nim=<?= $user['nim'] ?>" class="">
-                            <?php
-                            echo renderAvatar($user['username'], $user['photo']);
-                            ?>
-                        </a>
-                        <a href="userDetail.php?nim=<?= $user['nim'] ?>" class=" heading-2"><?= $user['fullname']; ?></a>
-                        <a href="userDetail.php?nim=<?= $user['nim'] ?>" class=" font-semibold"><?= $user['nim']; ?></a>
+        <div class="mb-10 p-6 grid grid-cols-2 gap-8 rounded border shadow w-full">
+            <?php if ($user): ?>
+                <div>
+                    <h2 class="mb-6 heading-2">Profile</h2>
+                    <div class="ktm rounded shadow border">
+                        <img src="<?= $user['ktm'] ?>" alt="KTM">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2">
+                    <h2 class=" heading-2">Profile</h2>
+                    <div></div>
+                    <div class="">
+                        <div class="mb-2 font-semibold">Fullname:</div>
+                        <span><?= $user['fullname'] ?></span>
+                    </div>
+                    <div class="">
+                        <div class="mb-2 font-semibold">Username:</div>
+                        <span><?= $user['username'] ?></span>
+                    </div>
+                    <div class="">
+                        <div class="mb-2 font-semibold">NIM:</div>
+                        <span><?= $user['nim'] ?></span>
+                    </div>
+                    <div class="">
+                        <div class="mb-2 font-semibold">Email:</div>
+                        <span><?= $user['email'] ?></span>
+                    </div>
+                    <div class="">
+                        <div class="mb-2 font-semibold">Joined at</div>
+                        <span><?= $user['joined_at'] ?></span>
+                    </div>
+                    <div class="">
+                        <div class="mb-2 font-semibold">Status</div>
+                        <span><?= $user['status'] ? 'Aktif' : 'Belum Aktif' ?></span>
+                    </div>
+                    <div>
                         <?php if ($user['status']): ?>
-                            <a href="adminApproveUser.php?nim=<?= $user['nim'] ?>&status=delete" class="py-4 bg-red w-full text-center shadow border rounded" onclick="return confirm('Are you sure want to delete this account?')">Delete Account</a>
+                            <a href="adminApproveUser.php?nim=<?= $user['nim'] ?>&status=delete" class="py-4 px-4 bg-red w-full text-center shadow border rounded" onclick="return confirm('Are you sure want to delete this account?')">Delete Account</a>
                         <?php else: ?>
                             <div class="w-full flex items-center justify-between gap-6">
                                 <a href="adminApproveUser.php?nim=<?= $user['nim'] ?>&status=approve" class="py-4 bg-green w-full text-center shadow border rounded" onclick="return confirm('Are you sure want to approve this account?')">Approve</a>
@@ -88,20 +100,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             </div>
                         <?php endif; ?>
                     </div>
-                <?php endforeach; ?>
+                </div>
             <?php else: ?>
-                <div>Belum Ada User</div>
+                <div>User tidak ditemukan</div>
             <?php endif; ?>
-        </div>
-        <div class="flex items-center justify-end">
-            <div class="">
-                <?php if ($page > 1): ?>
-                    <a href="manajemenUser.php?page=<?= $page - 1; ?>" class="py-4 px-6 bg-blue w-full text-center shadow border rounded">Previous</a>
-                <?php endif; ?>
-                <?php if ($result): ?>
-                    <a href="manajemenUser.php?page=<?= $page + 1; ?>" class="py-4 px-6 bg-blue w-full text-center shadow border rounded">Next</a>
-                <?php endif; ?>
-            </div>
         </div>
     </section>
 </body>

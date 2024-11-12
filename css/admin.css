@@ -30,3 +30,15 @@ body {
   width: 100%;
   height: 100%;
 }
+
+.ktm {
+  width: 100%;
+  object-fit: cover;
+  overflow: hidden;
+}
+
+.ktm img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}

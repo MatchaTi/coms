@@ -17,7 +17,7 @@
         </a>
     </div>
     <div class="nav-mobile">
-        <a href="" class="h-12 w-12 flex items-center justify-center rounded-full">
+        <a href="logout.php" class="h-12 w-12 flex items-center justify-center rounded-full" onclick="return confirm('Are you sure want to logout?')">
             <img src="assets/icons/logout.svg" alt="logout">
         </a>
     </div>

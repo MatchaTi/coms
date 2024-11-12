@@ -169,11 +169,15 @@ function checkValidPhoto($imgFile)
     ];
 }
 
-function getAllUsers()
+function getAllUsers($pagination = false, $page = 1, $limit = 8)
 {
     global $conn;
 
+    $offset = ($page - 1) * $limit;
     $sql = "SELECT * FROM users WHERE role = 'user' ORDER BY nim";
+    if ($pagination) {
+        $sql .= " LIMIT $limit OFFSET $offset";
+    }
     $result = $conn->query($sql);
     $users = [];
     if ($result->num_rows > 0) {
@@ -192,7 +196,6 @@ function getAllUsers()
 
     return $users;
 }
-
 function updateStatusUser($nim)
 {
     global $conn;
@@ -248,5 +251,53 @@ function deleteUser($nim)
             "message" => "User gagal dihapus"
         ];
     }
+}
+
+function searchUser($name)
+{
+    global $conn;
+
+    $sql = "SELECT * FROM users WHERE fullname LIKE '%$name%' OR username LIKE '%$name%' OR nim LIKE '%$name%' HAVING role = 'user'";
+    $result = $conn->query($sql);
+    $users = [];
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $users[] = [
+                "nim" => $row['nim'],
+                "username" => $row['username'],
+                "fullname" => $row['fullname'],
+                "email" => $row['email'],
+                "ktm" => $row['ktm'],
+                "photo" => $row['photo'],
+                "status" => $row['status']
+            ];
+        }
+    }
+
+    return $users;
+}
+
+function getSingleUser($nim)
+{
+    global $conn;
+
+    $sql = "SELECT * FROM users WHERE nim = $nim AND role = 'user'";
+    $result = $conn->query($sql);
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        return [
+            "nim" => $row['nim'],
+            "username" => $row['username'],
+            "fullname" => $row['fullname'],
+            "email" => $row['email'],
+            "ktm" => $row['ktm'],
+            "photo" => $row['photo'],
+            "status" => $row['status'],
+            "role" => $row['role'],
+            "joined_at" => $row['joined_at']
+        ];
+    }
+
+    return null;
 }
 ?>

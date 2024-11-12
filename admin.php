@@ -3,7 +3,7 @@ include 'components/avatar.php';
 
 session_start();
 
-if (!isset($_SESSION['user']) && $_SESSION['user']['role'] === 'admin') {
+if (!isset($_SESSION['user']) || $_SESSION['user']['role'] !== 'admin') {
     header('Location: login.php');
 }
 ?>
@@ -45,7 +45,12 @@ if (!isset($_SESSION['user']) && $_SESSION['user']['role'] === 'admin') {
                 </div>
             </div>
         </div>
-        <div>logout</div>
+        <a href="logout.php" class="flex gap-4 items-center" onclick="return confirm('Are you sure want to logout?')">
+            <div class="px-4 py-2 rounded-full border shadow bg-red">
+                <img src="assets/icons/logout.svg" alt="Logout">
+            </div>
+            <span class="font-semibold">Logout</span>
+        </a>
     </nav>
     <section>hello</section>
 </body>
