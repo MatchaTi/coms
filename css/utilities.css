@@ -181,6 +181,10 @@ a {
 .text-right {
   text-align: right;
 }
+
+.capitalize {
+  text-transform: capitalize;
+}
 /* typography end */
 
 /* display start */

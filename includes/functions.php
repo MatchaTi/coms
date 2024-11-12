@@ -300,4 +300,189 @@ function getSingleUser($nim)
 
     return null;
 }
+
+function addPost($userNIM, $title, $description, $category, $photo = null)
+{
+    global $conn;
+
+    $photoPath = null;
+
+    if ($photo['error'] == UPLOAD_ERR_OK) {
+        $photoCheck = checkValidPhoto($photo);
+        if (!$photoCheck['status']) {
+            return $photoCheck;
+        }
+
+        $fileExtention = pathinfo($photo['name'], PATHINFO_EXTENSION);
+        $uniqueName = uniqid("post_", true) . '.' . $fileExtention;
+        $uploadDir = 'uploads/posts/';
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        $photoPath = $uploadDir . $uniqueName;
+
+        if (!move_uploaded_file($photo['tmp_name'], $photoPath)) {
+            return [
+                "status" => false,
+                "message" => "Gagal mengupload foto"
+            ];
+        }
+    }
+
+    $sql = "INSERT INTO posts (user_nim, title, description, category_id, photo) VALUES ('$userNIM', '$title', '$description', '$category', '$photoPath')";
+    $result = $conn->query($sql);
+    if ($result) {
+        return [
+            "status" => true,
+            "message" => "Post berhasil ditambahkan, menunggu verifikasi admin!"
+        ];
+    } else {
+        return [
+            "status" => false,
+            "message" => "Post gagal ditambahkan!"
+        ];
+    }
+}
+
+function getAllPosts($pagination = false, $page = 1, $limit = 8)
+{
+    global $conn;
+
+    $offset = ($page - 1) * $limit;
+    $sql = "SELECT 
+                p.id, p.title, p.description, p.photo, p.created_at, p.status, p.counter_views, 
+                u.nim, u.username, u.photo AS photoUser, 
+                c.name,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id) AS total_comments
+            FROM posts p
+            JOIN users u on p.user_nim = u.nim
+           JOIN categories c on p.category_id = c.id";
+
+    if ($pagination) {
+        $sql .= " ORDER BY p.created_at DESC LIMIT $limit OFFSET $offset";
+    } else {
+        $sql .= " WHERE p.status = 1 ORDER BY p.created_at DESC";
+    }
+
+    $result = $conn->query($sql);
+    $posts = [];
+    if ($result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $posts[] = [
+                "id" => $row['id'],
+                "title" => $row['title'],
+                "description" => $row['description'],
+                "photo" => $row['photo'],
+                "category" => $row['name'],
+                "user" => [
+                    "nim" => $row['nim'],
+                    "username" => $row['username'],
+                    "photo" => $row['photoUser']
+                ],
+                "created_at" => $row['created_at'],
+                "status" => $row['status'],
+                "total_comments" => $row['total_comments'],
+                "counter_views" => $row['counter_views']
+            ];
+        }
+    }
+
+    return $posts;
+}
+
+function approvePost($id)
+{
+    global $conn;
+
+    $sql = "UPDATE posts SET status = 1 WHERE id = $id";
+    $result = $conn->query($sql);
+    if ($result) {
+        return [
+            "status" => true,
+            "message" => "Post berhasil diapprove"
+        ];
+    } else {
+        return [
+            "status" => false,
+            "message" => "Post gagal diapprove"
+        ];
+    }
+}
+
+function rejectPost($id)
+{
+    global $conn;
+
+    $sql = "DELETE FROM posts WHERE id = $id";
+    $result = $conn->query($sql);
+    if ($result) {
+        return [
+            "status" => true,
+            "message" => "Post berhasil direject"
+        ];
+    } else {
+        return [
+            "status" => false,
+            "message" => "Post gagal direject"
+        ];
+    }
+}
+
+function deletePost($id)
+{
+    global $conn;
+
+    $sql = "DELETE FROM posts WHERE id = $id";
+    $result = $conn->query($sql);
+    if ($result) {
+        return [
+            "status" => true,
+            "message" => "Post berhasil dihapus"
+        ];
+    } else {
+        return [
+            "status" => false,
+            "message" => "Post gagal dihapus"
+        ];
+    }
+}
+
+function getSinglePost($id)
+{
+    global $conn;
+
+    $sql = "SELECT 
+                p.id, p.title, p.description, p.photo, p.created_at, p.status, p.counter_views, 
+                u.nim, u.username, u.photo AS photoUser, 
+                c.name,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id) AS total_comments
+            FROM posts p
+            JOIN users u on p.user_nim = u.nim
+            JOIN categories c on p.category_id = c.id
+            WHERE p.id = $id";
+
+    $result = $conn->query($sql);
+
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        return [
+            "id" => $row['id'],
+            "title" => $row['title'],
+            "description" => $row['description'],
+            "photo" => $row['photo'],
+            "category" => $row['name'],
+            "user" => [
+                "nim" => $row['nim'],
+                "username" => $row['username'],
+                "photo" => $row['photoUser']
+            ],
+            "created_at" => $row['created_at'],
+            "status" => $row['status'],
+            "total_comments" => $row['total_comments'],
+            "counter_views" => $row['counter_views']
+        ];
+    }
+}
 ?>

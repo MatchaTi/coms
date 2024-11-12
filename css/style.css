@@ -43,6 +43,34 @@ body {
   flex-direction: column;
 }
 
+dialog {
+  z-index: 10;
+  margin-top: 10px;
+  margin: auto;
+  width: 90%;
+  max-width: 700px;
+  order: none;
+  margin: auto;
+}
+
+dialog::backdrop {
+  /* background-color: #00000030; */
+  background-color: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+
+.post-photo {
+  width: 100%;
+  height: fit-content;
+  object-fit: cover;
+  overflow: hidden;
+}
+
+.post-photo img {
+  width: 100%;
+  height: 100%;
+}
+
 @media (min-width: 768px) {
   .form-auth {
     min-width: 35vw;

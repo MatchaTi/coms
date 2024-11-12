@@ -35,6 +35,7 @@ CREATE TABLE posts(
     counter_views INT DEFAULT 0,
     user_nim VARCHAR(10) NOT NULL,
     category_id INT DEFAULT 1,
+    status TINYINT(1) DEFAULT 0,
     FOREIGN KEY (user_nim) REFERENCES users(nim) ON DELETE CASCADE ON UPDATE CASCADE,
     FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE CASCADE ON UPDATE CASCADE
 );
