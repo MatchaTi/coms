@@ -1,0 +1,40 @@
+create table users (
+	id int auto_increment primary key,
+    username varchar(50) not null,
+    fullname varchar(255),
+    bio varchar
+    email varchar(100) not null,
+    password varchar(255) not null,
+    photo varchar(255),
+    created_at timestamp default current_timestamp
+);
+
+create table posts (
+	id int auto_increment primary key,
+    user_id int,
+    category_id int,
+    title varchar(255) not null,
+    content text,
+    created_at timestamp default current_timestamp,
+    photo varchar(255),
+    watching_counter int auto_increment,
+    share_counter int auto_increment,
+    isSolve bool default false,
+    foreign key (category_id) references categories(id),
+    foreign key (user_id) references users(id)
+);
+
+create table categories (
+    id int auto_increment primary key,
+    name varchar(255) not null,
+);
+
+create table comments (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    post_id INT,
+    content TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (post_id) REFERENCES posts(id)
+)

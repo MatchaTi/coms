@@ -363,7 +363,7 @@ function getAllPosts($pagination = false, $page = 1, $limit = 4)
     if ($pagination) {
         $sql .= " ORDER BY p.created_at DESC LIMIT $limit OFFSET $offset";
     } else {
-        $sql .= " WHERE p.status = 1 ORDER BY p.created_at DESC";
+        $sql .= " ORDER BY p.created_at DESC";
     }
 
     $result = $conn->query($sql);
@@ -465,6 +465,28 @@ function getSinglePost($id)
 
     $result = $conn->query($sql);
 
+    $sqlComments = "SELECT c.id, c.content, c.created_at, u.nim, u.username, u.photo 
+                    FROM comments c JOIN users u ON c.user_nim = u.nim 
+                    WHERE c.post_id = $id ORDER BY c.created_at DESC";
+
+    $resultComments = $conn->query($sqlComments);
+
+    $comments = [];
+    if ($resultComments->num_rows > 0) {
+        while ($rowComment = $resultComments->fetch_assoc()) {
+            $comments[] = [
+                "id" => $rowComment['id'],
+                "content" => $rowComment['content'],
+                "created_at" => $rowComment['created_at'],
+                "user" => [
+                    "nim" => $rowComment['nim'],
+                    "username" => $rowComment['username'],
+                    "photo" => $rowComment['photo']
+                ]
+            ];
+        }
+    }
+
     if ($result->num_rows > 0) {
         $row = $result->fetch_assoc();
         return [
@@ -481,7 +503,8 @@ function getSinglePost($id)
             "created_at" => $row['created_at'],
             "status" => $row['status'],
             "total_comments" => $row['total_comments'],
-            "counter_views" => $row['counter_views']
+            "counter_views" => $row['counter_views'],
+            "comments" => $comments
         ];
     }
 }
@@ -504,5 +527,109 @@ function getTotalPosts()
     $result = $conn->query($sql);
     $row = $result->fetch_assoc();
     return $row['total'];
+}
+
+function addComment($postId, $userNim, $content)
+{
+    global $conn;
+    if (empty($content)) {
+        return [
+            "status" => false,
+            "message" => "Comments cannot be empty."
+        ];
+    }
+
+    $sql = "INSERT INTO comments(content, user_nim, post_id) VALUES('$content', '$userNim', '$postId')";
+    $result = $conn->query($sql);
+    if ($result) {
+        return [
+            "status" => true,
+            "message" => "Comment success added!"
+        ];
+    }
+
+    return [
+        "status" => false,
+        "message" => "Comment failed added!"
+    ];
+}
+function incrementWatchingCounter($id)
+{
+    global $conn;
+
+    $sql = "UPDATE posts SET counter_views = counter_views + 1 WHERE id = $id";
+    $conn->query($sql);
+}
+
+function editPost($postId, $title, $content, $categoryId, $imgFile, $removePhoto)
+{
+    global $conn;
+    if (empty($title) || empty($content) || empty($categoryId)) {
+        return [
+            "status" => false,
+            "message" => "Title, Content, and Category cannot be empty."
+        ];
+    }
+
+    $existingPhoto = null;
+
+    $sql = "SELECT photo FROM posts WHERE id = $postId";
+    $result = $conn->query($sql);
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        $existingPhoto = $row['photo'];
+    }
+
+    if ($removePhoto) {
+        if ($existingPhoto && file_exists($existingPhoto)) {
+            unlink($existingPhoto);
+        }
+        $imagePath = null;
+    } elseif ($imgFile && $imgFile['error'] == UPLOAD_ERR_OK) {
+        $photoCheck = checkValidPhoto($imgFile);
+        if (!$photoCheck['status']) {
+            return $photoCheck;
+        }
+
+        if ($existingPhoto && file_exists($existingPhoto)) {
+            unlink($existingPhoto);
+        }
+
+        $fileExtension = strtolower(pathinfo($imgFile['name'], PATHINFO_EXTENSION));
+        $uniqueName = uniqid("post_", true) . "." . $fileExtension;
+        $uploadDir = "img/posts/";
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        $imagePath = $uploadDir . $uniqueName;
+        $imagePath = $uploadDir . basename($imgFile['name']);
+        if (!move_uploaded_file($imgFile['tmp_name'], $imagePath)) {
+            return [
+                "status" => false,
+                "message" => "Failed to upload new image."
+            ];
+        }
+    }
+
+    $sql = "UPDATE posts SET title = '$title', description = '$content', category_id = $categoryId, photo = '$imagePath', status = 0 WHERE id = $postId";
+    $result = $conn->query($sql);
+    if (!$result) {
+        return [
+            "status" => false,
+            "message" => "Failed to update post."
+        ];
+    }
+
+    return [
+        "status" => true,
+        "message" => "Post updated successfully, please wait for admin confirmation!"
+    ];
+}
+
+function getProfileUser($nim)
+{
+    //wip
 }
 ?>

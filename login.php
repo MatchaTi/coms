@@ -1,31 +1,28 @@
 <?php
+include 'includes/connection.php';
 include 'includes/functions.php';
 
 session_start();
 
 if (isset($_SESSION['user'])) {
     header('Location: index.php');
-    exit();
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $nim = htmlspecialchars($_POST['nim']);
     $password = htmlspecialchars($_POST['password']);
-
     $result = login($nim, $password);
     if ($result['status']) {
-        echo "<script>alert('" . $result['message'] . "')</script>";
         $_SESSION['user'] = $result['data'];
         if ($result['data']['role'] == 'admin') {
             header('Location: admin.php');
-            exit();
+        } else {
+            header('Location: index.php');
         }
-        header('Location: index.php');
     } else {
         echo "<script>alert('" . $result['message'] . "')</script>";
     }
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -34,35 +31,42 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- styles -->
-    <link rel="stylesheet" href="css/utilities.css">
-    <link rel="stylesheet" href="css/style.css">
+    <!-- fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap" rel="stylesheet">
 
-    <title>Login | Coms</title>
+    <!-- styles -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/components.css">
+    <link rel="stylesheet" href="css/auth.css">
+
+    <!-- favicon -->
+    <link rel="shortcut icon" href="favicon.svg" type="image/x-icon">
+
+    <title>Login | COMS</title>
 </head>
 
-<body class="w-screen h-screen flex items-center justify-center">
-    <section class="container-auth w-full flex items-center justify-center gap-12">
+<body>
+    <div class="auth w-full flex items-center gap-6">
         <div>
-            <h1 class="heading-1">Coms</h1>
-            <p class="hero-paragraph leading-relaxed">Coms helps you connect and share with students, lecturers, and the community at Mulawarman University, strengthening connections and collaboration in the academic environment.</p>
+            <h1 class="heading">COMS</h1>
+            <p>Coms helps you connect and share with students, lecturers, and the community at Mulawarman University, strengthening connections and collaboration in the academic environment.</p>
         </div>
-        <form action="" class="form-auth w-full p-6 border shadow rounded-lg" method="POST" enctype="multipart/form-data">
-            <h2 class="heading-2 text-center mb-6">Login</h2>
+        <form action="" method="POST" class="mb-6 p-c w-full cream border shadow rounded-lg">
+            <h2 class="heading mb-6 text-center">Login</h2>
             <div class="mb-6">
-                <label for="nim" class="block mb-2 font-semibold">NIM</label>
-                <input type="text" name="nim" id="nim" class="p-6 rounded shadow border bg-blue w-full" placeholder="Ex: 2309106065" required>
+                <label for="nim" class="font-bold block mb-2">NIM</label>
+                <input type="text" name="nim" id="nim" placeholder="Ex: 2309106065" class="w-full red p-c rounded-lg border shadow" maxlength="10">
             </div>
-            <div class="mb-6">
-                <label for="password" class="block mb-2 font-semibold">Password</label>
-                <input type="password" name="password" id="password" class="p-6 rounded shadow border bg-pink w-full" placeholder="Min 4 characters" required>
+            <div class="mb-10">
+                <label for="password" class="font-bold block mb-2">Password</label>
+                <input type="password" name="password" id="password" placeholder="Min 4 characters" class="w-full green p-c rounded-lg border shadow" maxlength="50">
             </div>
-            <button type="submit" class="mb-6 py-4 w-full border shadow rounded font-semibold">Login</button>
-            <div class="text-center w-full">
-                <a href="register.php">Don't have a account? <span class="p-1 bg-light-blue">Register</span></a>
-            </div>
+            <button type="submit" class="btn auth w-full px-6 font-bold py-2 flex text-center justify-center border shadow rounded-lg">Login</button>
+            <div class="mt-3 text-center">Don't have account? <a href="register.php" class="blue px-1 py-1">Register</a></div>
         </form>
-    </section>
+    </div>
 </body>
 
 </html>

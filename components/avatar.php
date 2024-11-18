@@ -3,8 +3,8 @@ function renderAvatar($username, $photo, $size = 'avatar', $altText = 'Photo Pro
 {
     $photoUrl = $photo ? $photo : "https://ui-avatars.com/api/?name=" . urlencode($username);
     return "
-        <div class='photo-profile w-15 h-15 $class $size flex items-center justify-center rounded shadow border bg-red'>
-            <img src=$photoUrl alt='$altText $username'>
+        <div class='profile-avatar $class $size white border shadow rounded'>
+            <img src='$photoUrl' alt='$altText $username'>
         </div>
     ";
 }
