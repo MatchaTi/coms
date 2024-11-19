@@ -10,7 +10,7 @@ if (!isset($user)) {
     header('Location: login.php');
 }
 
-$userProfile = getProfileUserId($conn, $user['id']);
+$userProfile = getProfileUser($user['nim']);
 
 if (!$userProfile['status']) {
     echo "<script>alert('" . addslashes($userProfile['message']) . "'); setTimeout(function() { window.location.href = 'index.php'; }, 0);</script>";
@@ -23,13 +23,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $newPassword = htmlspecialchars($_POST['newPassword']);
     $password = htmlspecialchars($_POST['password']);
     $photoProfile = isset($_FILES['photoProfile']) ? $_FILES['photoProfile'] : null;
+    $linkInstagram = htmlspecialchars($_POST['instagram']);
+    $linkFacebook = htmlspecialchars($_POST['facebook']);
+    $linkGithub = htmlspecialchars($_POST['github']);
+    $linkLinkedin = htmlspecialchars($_POST['linkedin']);
     $deletePhotoProfile = (bool) $_POST['deletePhotoProfile'];
 
-    $result = editProfile($conn, $user['id'], $username, $fullname, $bio, $newPassword, $password, $photoProfile, $deletePhotoProfile);
+    $result = editProfile($user['nim'], $username, $fullname, $bio, $newPassword, $password, $photoProfile, $linkInstagram, $linkFacebook, $linkGithub, $linkLinkedin, $deletePhotoProfile);
     if (!$result['status']) {
         echo "<script>alert('" . addslashes($result['message']) . "'); setTimeout(function() { window.location.href = 'editProfile.php'; }, 0);</script>";
     } else {
-        echo "<script>alert('" . addslashes($result['message']) . "'); setTimeout(function() { window.location.href = 'profile.php?id=" . $user['id'] . "'; }, 0);</script>";
+        echo "<script>alert('" . addslashes($result['message']) . "'); setTimeout(function() { window.location.href = 'profile.php?nim=" . $user['nim'] . "'; }, 0);</script>";
     }
 }
 
@@ -53,7 +57,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <!-- favicon -->
     <link rel="shortcut icon" href="favicon.svg" type="image/x-icon">
 
-    <title>Edit Profile | Issue Sedunia</title>
+    <title>Edit Profile | COMS</title>
 </head>
 
 <body>
@@ -63,10 +67,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     echo dialog();
     ?>
     <h2 class="heading text-center mb-6">Edit Profile</h2>
-
-    <div class="music-container hidden p-c cream border shadow rounded-lg">
-        <h2 class="font-bold mb-6">Soundboard</h2>
-    </div>
 
     <section class="mb-6 p-c cream border rounded-lg shadow">
         <div class="flex items-center justify-between mb-2">
@@ -80,35 +80,57 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             ?>
         </div>
         <div class="profile-bio mb-2"><?= $userProfile['user']['bio'] ?></div>
-        <div class="mb-6 text-sm">Joined at <?= $userProfile['user']['created_at'] ?></div>
+        <div class="mb-6 text-sm">Joined at <?= $userProfile['user']['joined_at'] ?></div>
     </section>
 
     <form action="" method="POST" class="mb-6 p-c w-full cream border shadow rounded-lg" enctype="multipart/form-data">
-        <div class="mb-6">
-            <label for="username" class="heading block mb-2">Username</label>
-            <input type="text" name="username" id="username" placeholder="Ex: fuyu" class="w-full red p-c rounded-lg border shadow" value="<?= $userProfile['user']['username'] ?>" maxlength="25">
-        </div>
-        <div class="mb-6">
-            <label for="fullname" class="heading block mb-2">Fullname</label>
-            <input type="text" name="fullname" id="fullname" placeholder="Ex: Raana Fuyu" class="w-full yellow p-c rounded-lg border shadow" value="<?= $userProfile['user']['fullname'] ?>" maxlength="25">
+        <div class="flex gap-6">
+            <div class="mb-6 w-full">
+                <label for="username" class="heading block mb-2">Username</label>
+                <input type="text" name="username" id="username" placeholder="Ex: fuyu" class="w-full red p-c rounded-lg border shadow" value="<?= $userProfile['user']['username'] ?>" maxlength="25">
+            </div>
+            <div class="mb-6 w-full">
+                <label for="fullname" class="heading block mb-2">Fullname</label>
+                <input type="text" name="fullname" id="fullname" placeholder="Ex: Raana Fuyu" class="w-full yellow p-c rounded-lg border shadow" value="<?= $userProfile['user']['fullname'] ?>" maxlength="25">
+            </div>
         </div>
         <div class="mb-6">
             <label for="bio" class="heading block mb-2">Bio</label>
             <textarea name="bio" id="bio" class="w-full light-green p-c rounded-lg border shadow" maxlength="75" placeholder="Your Bio"><?= $userProfile['user']['bio'] ?></textarea>
         </div>
-        <div class="mb-6">
-            <label for="newPassword" class="heading block mb-2">New Password</label>
-            <input type="password" name="newPassword" id="newPassword" placeholder="New password min 8 characters" class="w-full pink p-c rounded-lg border shadow">
+        <div class="flex gap-6">
+            <div class="mb-6 w-full">
+                <label for="newPassword" class="heading block mb-2">New Password</label>
+                <input type="password" name="newPassword" id="newPassword" placeholder="New password min 4 characters" class="w-full pink p-c rounded-lg border shadow">
+            </div>
+            <div class="mb-6 w-full">
+                <label for="password" class="heading block mb-2">Current Password</label>
+                <input type="password" name="password" id="password" placeholder="Current password min 4 characters" class="w-full blue p-c rounded-lg border shadow" required>
+            </div>
         </div>
         <div class="mb-6">
-            <label for="password" class="heading block mb-2">Current Password</label>
-            <input type="password" name="password" id="password" placeholder="Current password min 8 characters" class="w-full blue p-c rounded-lg border shadow">
-        </div>
-        <div class="mb-10">
             <label for="photoProfile" class="heading block mb-2">Photo Profile</label>
             <input type="file" name="photoProfile" id="photoProfile" class="mb-6 w-full purple p-c rounded-lg border shadow" onclick="addPhoto()">
             <input type="hidden" class="indicator-delete-photo" name="deletePhotoProfile" value="0">
             <button type="button" class="btn-delete-photo btn px-4 py-2 red rounded shadow border font-medium <?= $userProfile['user']['photo'] ? "" : "hidden" ?>" onclick="return deletePhoto()">Delete Photo Profile</button>
+        </div>
+        <div class="mb-6 grid grid-cols-2 gap-6">
+            <div class="w-full">
+                <label for="instagram" class="heading block mb-2">Instagram</label>
+                <input type="text" name="instagram" id="instagram" placeholder="Ex: fuyu" class="w-full pink p-c rounded-lg border shadow" value="<?= $userProfile['user']['link_instagram'] ?>" maxlength="100">
+            </div>
+            <div class="w-full">
+                <label for="facebook" class="heading block mb-2">Facebook</label>
+                <input type="text" name="facebook" id="facebook" placeholder="Ex: Raana Fuyu" class="w-full blue p-c rounded-lg border shadow" value="<?= $userProfile['user']['link_facebook'] ?>" maxlength="100">
+            </div>
+            <div class="w-full">
+                <label for="github" class="heading block mb-2">Github</label>
+                <input type="text" name="github" id="github" placeholder="Ex: Raana Fuyu" class="w-full white p-c rounded-lg border shadow" value="<?= $userProfile['user']['link_github'] ?>" maxlength="100">
+            </div>
+            <div class="w-full">
+                <label for="linkedin" class="heading block mb-2">Linkedin</label>
+                <input type="text" name="linkedin" id="linkedin" placeholder="Ex: Raana Fuyu" class="w-full light-green p-c rounded-lg border shadow" value="<?= $userProfile['user']['link_linkedin'] ?>" maxlength="100">
+            </div>
         </div>
         <div class="flex items-center justify-between">
             <a href="deleteAccount.php" type="button" class="btn px-4 py-2 red rounded shadow border font-medium" onclick="return confirmPrompt('Delete Account','Are you sure you want to delete this account?', 'deleteAccount.php')">Delete Account</a>
@@ -119,7 +141,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         </div>
     </form>
 
-    <script src="js/music.js"></script>
     <script src="js/editProfile.js"></script>
     <script src="js/dialog.js"></script>
 </body>

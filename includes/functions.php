@@ -669,4 +669,87 @@ function getProfileUser($nim)
         "posts" => $posts
     ];
 }
+
+function editProfile($nim, $username, $fullname, $bio, $newPassword, $password, $photoProfile, $linkInstagram, $linkFacebook, $linkGithub, $linkLinkedin, $deletePhotoProfile = false)
+{
+    global $conn;
+
+    $allUsers = "SELECT username, fullname FROM users";
+    $resultAllUsers = $conn->query($allUsers);
+    $user = "SELECT username, fullname, password, photo FROM users WHERE nim = $nim";
+    $resultUser = $conn->query($user);
+    $rowUser = $resultUser->fetch_assoc();
+    while ($row = $resultAllUsers->fetch_assoc()) {
+        if ($username == $row['username'] && $username != $rowUser['username']) {
+            return [
+                "status" => false,
+                "message" => "Username already exists"
+            ];
+        }
+        if ($fullname == $row['fullname'] && $fullname != $rowUser['fullname']) {
+            return [
+                "status" => false,
+                "message" => "Fullname already exists"
+            ];
+        }
+    }
+
+    if (!password_verify($password, $rowUser['password'])) {
+        return [
+            "status" => false,
+            "message" => "Password is incorrect"
+        ];
+    }
+
+    $existingPhoto = $rowUser['photo'];
+    $imagePath = $existingPhoto;
+
+    if ($deletePhotoProfile) {
+        if ($existingPhoto && file_exists($existingPhoto)) {
+            unlink($existingPhoto);
+        }
+        $imagePath = null;
+    } elseif ($photoProfile && $photoProfile['error'] == UPLOAD_ERR_OK) {
+        $photoCheck = checkValidPhoto($photoProfile);
+        if (!$photoCheck['status']) {
+            return $photoCheck;
+        }
+
+        if ($existingPhoto && file_exists($existingPhoto)) {
+            unlink($existingPhoto);
+        }
+
+        $fileExtension = strtolower(pathinfo($photoProfile['name'], PATHINFO_EXTENSION));
+        $uniqueName = uniqid("profile_", true) . "." . $fileExtension;
+        $uploadDir = "uploads/profile/";
+
+        if (!is_dir($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        $imagePath = $uploadDir . $uniqueName;
+        if (!move_uploaded_file($photoProfile['tmp_name'], $imagePath)) {
+            return [
+                "status" => false,
+                "message" => "Failed to upload new image."
+            ];
+        }
+    }
+
+    $newPassword = $newPassword ? password_hash($newPassword, PASSWORD_DEFAULT) : $rowUser['password'];
+
+    $sql = "UPDATE users SET username = '$username', fullname = '$fullname', bio = '$bio', password = '$newPassword', photo = '$imagePath', link_instagram = '$linkInstagram', link_facebook = '$linkFacebook', link_github = '$linkGithub', link_linkedin = '$linkLinkedin' WHERE nim = $nim";
+    $result = $conn->query($sql);
+    if ($result) {
+        return [
+            "status" => true,
+            "message" => "Profile updated successfully"
+        ];
+    } else {
+        return [
+            "status" => false,
+            "message" => "Failed to update profile"
+        ];
+    }
+}
 ?>
