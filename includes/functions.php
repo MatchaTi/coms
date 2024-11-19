@@ -597,7 +597,7 @@ function editPost($postId, $title, $content, $categoryId, $imgFile, $removePhoto
 
         $fileExtension = strtolower(pathinfo($imgFile['name'], PATHINFO_EXTENSION));
         $uniqueName = uniqid("post_", true) . "." . $fileExtension;
-        $uploadDir = "img/posts/";
+        $uploadDir = 'uploads/posts/';
 
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0777, true);
