@@ -57,6 +57,28 @@ $profileUser = getProfileUser($_GET['nim']);
             </div>
             <div class="mb-2"><?= $profileUser['user']['bio'] ?></div>
             <div class="mb-6 text-sm">Joined <?= explode(' ', $profileUser['user']['joined_at'])[0] ?></div>
+            <div class="mb-6 flex items-center gap-3">
+                <?php if ($profileUser['user']['link_instagram']): ?>
+                    <a href="<?= $profileUser['user']['link_instagram'] ?>" class="h-12 w-12 flex items-center justify-center rounded-full shadow border red">
+                        <img src="assets/icons/instagram.svg" alt="Instagram">
+                    </a>
+                <?php endif; ?>
+                <?php if ($profileUser['user']['link_facebook']): ?>
+                    <a href="<?= $profileUser['user']['link_facebook'] ?>" class="h-12 w-12 flex items-center justify-center rounded-full shadow border orange">
+                        <img src="assets/icons/facebook.svg" alt="Facebook">
+                    </a>
+                <?php endif; ?>
+                <?php if ($profileUser['user']['link_github']): ?>
+                    <a href="<?= $profileUser['user']['link_github'] ?>" class="h-12 w-12 flex items-center justify-center rounded-full shadow border yellow">
+                        <img src="assets/icons/github.svg" alt="Github">
+                    </a>
+                <?php endif; ?>
+                <?php if ($profileUser['user']['link_linkedin']): ?>
+                    <a href="<?= $profileUser['user']['link_linkedin'] ?>" class="h-12 w-12 flex items-center justify-center rounded-full shadow border green">
+                        <img src="assets/icons/linkedin.svg" alt="Linkedin">
+                    </a>
+                <?php endif; ?>
+            </div>
             <?php if ($profileUser['user']['nim'] == $user['nim']): ?>
                 <div class="flex w-full gap-3">
                     <a href="editProfile.php" class="btn w-full px-6 py-2 pink font-bold flex text-center justify-center border shadow rounded-lg">Edit Profile</a>
