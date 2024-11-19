@@ -111,7 +111,7 @@ if ($post['status']) {
                         <?php endif; ?>
                     </div>
                 </div>
-                <div class="px-6 mt-3 mb-3">
+                <div class="px-6 mt-6 mb-3">
                     <h3 class="px-6 py-4 heading border rounded shadow blue"><?= $post['title']; ?></h3>
                 </div>
                 <div class="px-6 text-justify"><?= $post['description']; ?></div>
@@ -123,15 +123,15 @@ if ($post['status']) {
                     </div>
                 <?php endif ?>
                 <div class="p-c flex items-center gap-3 flex-wrap">
-                    <div class="px-6 py-1 flex gap-1 font-medium border shadow rounded pink">
+                    <div class="px-6 py-1 flex gap-1 font-medium border shadow rounded-full red">
                         <img src="assets/icons/comment.svg" alt="comment">
                         <div><?= count($post['comments']) ?></div>
                     </div>
-                    <div class="px-6 py-1 flex gap-1 font-medium border shadow rounded blue">
+                    <div class="px-6 py-1 flex gap-1 font-medium border shadow rounded-full yellow">
                         <img src="assets/icons/views.svg" alt="views">
                         <div><?= $post['counter_views'] ?></div>
                     </div>
-                    <button class="px-6 py-1 flex gap-1 font-medium border shadow rounded green" onclick="shareLink(<?= $post['id'] ?>)">
+                    <button class="px-6 py-1 flex gap-1 font-medium border shadow rounded-full green" onclick="shareLink(<?= $post['id'] ?>)">
                         <img src="assets/icons/share.svg" alt="share">
                     </button>
                 </div>

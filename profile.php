@@ -38,52 +38,11 @@ $profileUser = getProfileUser($_GET['nim']);
 <body>
     <?php
     include 'components/navbar.php';
+    include 'components/dialog.php';
     echo navbar();
+    echo dialog();
     ?>
     <h2 class="heading text-center mb-6">Profile</h2>
-
-    <div class="music-container hidden p-c cream border shadow rounded-lg">
-        <h2 class="font-bold mb-6">Soundboard</h2>
-    </div>
-
-    <dialog class="dialog cream shadow border rounded-lg">
-        <div class="p-c border-b grid grid-cols-3">
-            <div class="flex gap-3 items-center">
-                <div class="w-5 h-5 rounded-full shadow border red"></div>
-                <div class="w-5 h-5 rounded-full shadow border yellow"></div>
-                <div class="w-5 h-5 rounded-full shadow border green"></div>
-            </div>
-            <h2 class="text-center font-bold">New Post</h2>
-            <button type="button" class="cancel-post text-end font-medium">Cancel</button>
-        </div>
-        <div class="p-c flex gap-6">
-            <div class="avatar white rounded-full shadow border"></div>
-            <form action="" class="w-full" enctype="multipart/form-data" method="POST">
-                <div class="mb-6">
-                    <label for="kategori" class="heading block mb-2">Category</label>
-                    <select name="kategori" id="kategori" class="px-6 py-2 purple rounded shadow border w-full">
-                        <option value="Front-End" selected>Front-End</option>
-                        <option value="Back-End">Back-End</option>
-                        <option value="Full-Stack">Full-Stack</option>
-                    </select>
-                </div>
-                <div class="mb-6">
-                    <label for="title" class="heading block mb-2">Title Post</label>
-                    <input type="text" name="title" id="title" placeholder="Raana! What's new?" class="w-full blue p-c rounded-lg border shadow">
-                </div>
-                <div class="mb-6">
-                    <label for="description" class="heading block mb-2">Description Post</label>
-                    <input type="text" name="description" id="description" placeholder="What's your describe about this post" class="w-full yellow p-c rounded-lg border shadow">
-                </div>
-                <div class="mb-10">
-                    <label for="photoPost" class="heading block mb-2">Photo Post</label>
-                    <input type="file" name="photoPost" id="photoPost" class="mb-6 w-full light-green p-c rounded-lg border shadow">
-                    <button type="button" class="btn px-4 py-2 red rounded shadow border font-medium">Delete Photo Post</button>
-                </div>
-                <button type="submit" class="btn auth w-full px-6 font-bold py-2 flex text-center justify-center border shadow rounded-lg">Post</button>
-            </form>
-        </div>
-    </dialog>
 
     <?php if ($profileUser['status']): ?>
         <section class="profile mb-6 p-c cream border rounded-lg shadow">
@@ -97,11 +56,11 @@ $profileUser = getProfileUser($_GET['nim']);
                 ?>
             </div>
             <div class="mb-2"><?= $profileUser['user']['bio'] ?></div>
-            <div class="mb-6 text-sm">Joined <?= explode(' ', $profileUser['user']['created_at'])[0] ?></div>
-            <?php if ($profileUser['user']['id'] == $user['id']): ?>
+            <div class="mb-6 text-sm">Joined <?= explode(' ', $profileUser['user']['joined_at'])[0] ?></div>
+            <?php if ($profileUser['user']['nim'] == $user['nim']): ?>
                 <div class="flex w-full gap-3">
                     <a href="editProfile.php" class="btn w-full px-6 py-2 pink font-bold flex text-center justify-center border shadow rounded-lg">Edit Profile</a>
-                    <a href="logout.php" class="btn w-full px-6 py-2 red font-bold flex text-center justify-center border shadow rounded-lg" onclick="return confirm('Are you sure you want to logout?')">Logout</a>
+                    <a href="logout.php" class="btn w-full px-6 py-2 red font-bold flex text-center justify-center border shadow rounded-lg" onclick="return confirmPrompt(\'Logout\',\'Are you sure you want to logout?\', \'logout.php\')">Logout</a>
                 </div>
             <?php endif; ?>
         </section>
@@ -109,7 +68,7 @@ $profileUser = getProfileUser($_GET['nim']);
         <h2 class="heading text-center mb-6">Posts</h2>
         <?php if ($profileUser['posts']): ?>
             <?php foreach ($profileUser['posts'] as $post): ?>
-                <article class="flex gap-6 mb-6">
+                <article class="flex gap-6 mb-6 <?= !$post['status'] ? "pending" : "" ?>">
                     <?php
                     echo renderAvatar($profileUser['user']['username'], $profileUser['user']['photo'], 'avatar', 'Photo Profile', 'post-avatar-desktop mt-3');
                     ?>
@@ -124,16 +83,22 @@ $profileUser = getProfileUser($_GET['nim']);
                             </div>
                             <div class="flex items-center gap-3 flex-wrap">
                                 <div class="capitalize px-6 py-1 font-medium border rounded shadow <?= $post['category']; ?>"><?= $post['category'] ?></div>
-                                <div class="px-6 py-1 font-medium border rounded shadow <?= $post['isSolve'] ? 'green' : 'red' ?>"><?= $post['isSolve'] ? 'Solved' : 'Not Solve'; ?></div>
-                                <?php if ($user['id'] == $post['user_id']): ?>
-                                    <div class="w-10 h-10 flex items-center justify-center light-green border shadow rounded">
-                                        <img src="assets/icons/menu.svg" alt="menu">
-                                    </div>
+                                <?php if (!$post['status']): ?>
+                                    <div class="capitalize px-4 py-1 font-medium border rounded shadow red"><?= !$post['status'] ? "Pending" : "" ?></div>
                                 <?php endif; ?>
+                                <button type="button" class="relative btn-floating w-10 h-10 flex items-center justify-center light-green border shadow rounded">
+                                    <img src="assets/icons/menu.svg" alt="menu">
+                                    <div class="floating-action cream border shadow rounded">
+                                        <a href="editPost.php?id=<?= $post['id'] ?>" class="block px-6 py-2 font-medium border-b">Edit</a>
+                                        <a href="deletePost.php?id=<?= $post['id'] ?>" class="block px-6 py-2 font-medium" onclick="return confirmPrompt('Delete Post','Are you sure want to delete this post?', 'deletePost.php?id=<?= $post['id'] ?>')">Delete</a>
+                                    </div>
+                                </button>
                             </div>
                         </div>
-                        <h3 class="px-6 py-4 heading"><?= $post['title']; ?></h3>
-                        <div class="px-6 text-justify"><?= $post['content']; ?></div>
+                        <div class="px-6 mt-6 mb-3">
+                            <h3 class="px-6 py-4 heading border rounded shadow blue"><?= $post['title']; ?></h3>
+                        </div>
+                        <div class="px-6 text-justify"><?= $post['description']; ?></div>
                         <?php if ($post['photo']): ?>
                             <div class="px-6">
                                 <div class="post-photo w-full rounded shadow border">
@@ -142,17 +107,16 @@ $profileUser = getProfileUser($_GET['nim']);
                             </div>
                         <?php endif ?>
                         <div class="p-c flex items-center gap-3 flex-wrap">
-                            <a href="post.php?id=<?= $post['id'] ?>" class="px-6 py-1 flex gap-1 font-medium border shadow rounded pink">
+                            <a href="post.php?id=<?= $post['id'] ?>" class="px-6 py-1 flex gap-1 font-medium border shadow rounded-full red">
                                 <img src="assets/icons/comment.svg" alt="comment">
-                                <div><?= $post['comment_count'] ?></div>
+                                <div><?= $post['total_comments'] ?></div>
                             </a>
-                            <div class="px-6 py-1 flex gap-1 font-medium border shadow rounded blue">
+                            <div class="px-6 py-1 flex gap-1 font-medium border shadow rounded-full yellow">
                                 <img src="assets/icons/views.svg" alt="views">
-                                <div><?= $post['watching_counter'] ?></div>
+                                <div><?= $post['counter_views'] ?></div>
                             </div>
-                            <button onclick="shareLink(<?= $post['id'] ?>)" class="share-btn px-6 py-1 flex gap-1 font-medium border shadow rounded green">
+                            <button onclick="shareLink(<?= $post['id'] ?>)" class="share-btn px-6 py-1 flex gap-1 font-medium border shadow rounded-full green">
                                 <img src="assets/icons/share.svg" alt="share">
-                                <div><?= $post['watching_counter'] ?></div>
                             </button>
                         </div>
                     </div>
@@ -163,8 +127,8 @@ $profileUser = getProfileUser($_GET['nim']);
         <div class="text-center font-bold"><?= $profileUser['message'] ?></div>
     <?php endif; ?>
 
-    <script src="js/music.js"></script>
     <script src="js/script.js"></script>
+    <script src="js/dialog.js"></script>
 </body>
 
 </html>

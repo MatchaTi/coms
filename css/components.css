@@ -236,6 +236,10 @@ button {
   margin-top: 12px;
 }
 
+.mt-6 {
+  margin-top: 24px;
+}
+
 .mb-2 {
   margin-bottom: 8px;
 }

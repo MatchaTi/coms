@@ -4,6 +4,7 @@ require 'includes/functions.php';
 
 session_start();
 
+
 $user = $_SESSION['user'];
 $userId = $_GET['id'];
 if (!isset($user) || $user['role'] == 'user') {

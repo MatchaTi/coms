@@ -122,7 +122,7 @@ $allPosts = getAllPosts();
                         <?php
                         echo renderAvatar($post['user']['username'], $post['user']['photo'], 'avatar', 'Photo Profile', 'post-avatar-mobile');
                         ?>
-                        <a href="profile.php?id=<?= $post['user']['nim'] ?>" class="heading capitalize"><?= $post['user']['username']; ?></a>
+                        <a href="profile.php?nim=<?= $post['user']['nim'] ?>" class="heading capitalize"><?= $post['user']['username']; ?></a>
                         <p class="text-sm"><?= explode(' ', $post['created_at'])[0]; ?></p>
                     </div>
                     <div class="flex items-center gap-3 flex-wrap">
@@ -141,7 +141,7 @@ $allPosts = getAllPosts();
                         <?php endif; ?>
                     </div>
                 </div>
-                <div class="px-6 mt-3 mb-3">
+                <div class="px-6 mt-6 mb-3">
                     <h3 class="px-6 py-4 heading border rounded shadow blue"><?= $post['title']; ?></h3>
                 </div>
                 <div class="mb-3 px-6 text-justify"><?= $post['description']; ?></div>
@@ -170,7 +170,6 @@ $allPosts = getAllPosts();
     <?php endforeach; ?>
 
     <script src="js/script.js"></script>
-    <script src="js/music.js"></script>
     <script src="js/dialog.js"></script>
 </body>
 

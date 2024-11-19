@@ -630,6 +630,43 @@ function editPost($postId, $title, $content, $categoryId, $imgFile, $removePhoto
 
 function getProfileUser($nim)
 {
-    //wip
+    global $conn;
+
+    $sqlUser = "SELECT * FROM users WHERE nim = $nim";
+    $resultUser = $conn->query($sqlUser);
+    $user = $resultUser->fetch_assoc();
+    $sqlPosts = "SELECT 
+                p.id, p.title, p.description, p.photo, p.created_at, p.status, p.counter_views, 
+                u.nim, u.username, u.photo AS photoUser, 
+                c.name,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id) AS total_comments
+                FROM posts p
+                JOIN users u on p.user_nim = u.nim
+                JOIN categories c on p.category_id = c.id
+                WHERE u.nim = $nim
+                ORDER BY p.created_at DESC";
+    $resultPosts = $conn->query($sqlPosts);
+    $posts = [];
+    if ($resultPosts->num_rows > 0) {
+        while ($row = $resultPosts->fetch_assoc()) {
+            $posts[] = [
+                "id" => $row['id'],
+                "title" => $row['title'],
+                "description" => $row['description'],
+                "photo" => $row['photo'],
+                "category" => $row['name'],
+                "created_at" => $row['created_at'],
+                "status" => $row['status'],
+                "total_comments" => $row['total_comments'],
+                "counter_views" => $row['counter_views']
+            ];
+        }
+    }
+
+    return [
+        "status" => true,
+        "user" => $user,
+        "posts" => $posts
+    ];
 }
 ?>
