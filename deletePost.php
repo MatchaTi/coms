@@ -22,9 +22,6 @@ if ($post['user']['nim'] != $_SESSION['user']['nim']) {
     </script>";
 }
 
-
-
-
 ?>
 
 <!DOCTYPE html>
