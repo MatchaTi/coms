@@ -752,3 +752,104 @@ function editProfile($nim, $username, $fullname, $bio, $newPassword, $password, 
     ];
   }
 }
+
+function top5WatchingCounter()
+{
+  global $conn;
+
+  $sql = "SELECT 
+                p.id, p.title, p.description, p.photo, p.created_at, p.status, p.counter_views, 
+                u.nim, u.username, u.photo AS photoUser, 
+                c.name,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id) AS total_comments
+           FROM posts p
+           JOIN users u on p.user_nim = u.nim
+           JOIN categories c on p.category_id = c.id
+            ORDER BY p.counter_views DESC LIMIT 5";
+
+
+  $result = $conn->query($sql);
+  $posts = [];
+  if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+      $posts[] = [
+        "id" => $row['id'],
+        "title" => $row['title'],
+        "description" => $row['description'],
+        "photo" => $row['photo'],
+        "category" => $row['name'],
+        "user" => [
+          "nim" => $row['nim'],
+          "username" => $row['username'],
+          "photo" => $row['photoUser']
+        ],
+        "created_at" => $row['created_at'],
+        "status" => $row['status'],
+        "total_comments" => $row['total_comments'],
+        "counter_views" => $row['counter_views']
+      ];
+    }
+  }
+
+  return $posts;
+}
+
+function search($keyword)
+{
+  global $conn;
+
+  $sql = "SELECT 
+                p.id, p.title, p.description, p.photo, p.created_at, p.status, p.counter_views, 
+                u.nim, u.username, u.photo AS photoUser, 
+                c.name,
+                (SELECT COUNT(*) FROM comments WHERE post_id = p.id) AS total_comments
+            FROM posts p
+            JOIN users u on p.user_nim = u.nim
+           JOIN categories c on p.category_id = c.id
+            WHERE p.title LIKE '%$keyword%' OR p.description LIKE '%$keyword%' OR u.username LIKE '%$keyword%' OR c.name LIKE '%$keyword%'";
+
+  $result = $conn->query($sql);
+  $posts = [];
+  if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+      $posts[] = [
+        "id" => $row['id'],
+        "title" => $row['title'],
+        "description" => $row['description'],
+        "photo" => $row['photo'],
+        "category" => $row['name'],
+        "user" => [
+          "nim" => $row['nim'],
+          "username" => $row['username'],
+          "photo" => $row['photoUser']
+        ],
+        "created_at" => $row['created_at'],
+        "status" => $row['status'],
+        "total_comments" => $row['total_comments'],
+        "counter_views" => $row['counter_views']
+      ];
+    }
+  }
+
+  $sqlUsers = "SELECT * FROM users WHERE username LIKE '%$keyword%' OR fullname LIKE '%$keyword%' AND role = 'user' HAVING role = 'user'";
+  $resultUsers = $conn->query($sqlUsers);
+  $users = [];
+  if ($resultUsers->num_rows > 0) {
+    while ($row = $resultUsers->fetch_assoc()) {
+      $users[] = [
+        "nim" => $row['nim'],
+        "username" => $row['username'],
+        "fullname" => $row['fullname'],
+        "email" => $row['email'],
+        "photo" => $row['photo'],
+        "status" => $row['status']
+      ];
+    }
+  }
+
+
+  return [
+    "users" => $users,
+    "posts" => $posts
+  ];
+}

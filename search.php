@@ -11,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
   $searchResult = search($keyword);
 }
 
-$top5Post = top5WatchingCounter($conn);
+$top5Post = top5WatchingCounter();
 ?>
 
 <!DOCTYPE html>
@@ -97,9 +97,12 @@ $top5Post = top5WatchingCounter($conn);
     <h2 class="heading text-center mb-6">Users</h2>
     <?php if (count($searchResult['users']) > 0): ?>
       <?php foreach ($searchResult['users'] as $user): ?>
-        <section class="flex gap-6 items-center mb-6">
-          <a href="profile.php?id=<?= $user['id'] ?>" class="w-full p-c cream shadow border rounded-full"><?= $user['username'] ?></a>
-        </section>
+        <a href="profile.php?nim=<?= $user['nim'] ?>" class="flex gap-6 items-center mb-6">
+          <?php
+          echo renderAvatar($user['username'], $user['photo'], 'avatar', 'Photo Profile');
+          ?>
+          <span class="w-full p-c cream shadow border rounded-full"><?= $user['username'] ?></span>
+        </a>
       <?php endforeach ?>
     <?php else: ?>
       <section class="flex gap-6 items-center mb-6">
@@ -109,9 +112,28 @@ $top5Post = top5WatchingCounter($conn);
     <h2 class="heading text-center mb-6">Posts</h2>
     <?php if (count($searchResult['posts']) > 0): ?>
       <?php foreach ($searchResult['posts'] as $post): ?>
-        <section class="flex gap-6 items-center mb-6">
-          <a href="post.php?id=<?= $post['id'] ?>" class="w-full p-c cream shadow border rounded-full"><?= $post['title'] ?></a>
-        </section>
+        <a href="post.php?id=<?= $post['id'] ?>" class="flex gap-6 mb-6">
+          <div class="w-full cream shadow border rounded-lg">
+            <div class="p-c flex items-center justify-between border-b flex-wrap gap-3">
+              <div class="flex items-center gap-3">
+                <?php
+                echo renderAvatar($post['user']['username'], $post['user']['photo'], 'avatar', 'Photo Profile');
+                ?>
+                <div class="heading capitalize"><?= $post['user']['username']; ?></div>
+              </div>
+              <div class="flex items-center gap-3 flex-wrap">
+                <div class="capitalize px-6 py-1 font-medium border rounded shadow <?= $post['category']; ?>"><?= $post['category'] ?></div>
+              </div>
+            </div>
+            <h3 class="px-6 py-4 heading"><?= $post['title']; ?></h3>
+            <div class="p-c flex items-center gap-3 flex-wrap">
+              <div class="px-6 py-1 flex gap-1 font-medium border shadow rounded blue">
+                <img src="assets/icons/views.svg" alt="views">
+                <div><?= $post['counter_views'] ?></div>
+              </div>
+            </div>
+          </div>
+        </a>
       <?php endforeach ?>
     <?php else: ?>
       <section class="flex gap-6 items-center mb-6">
@@ -127,7 +149,10 @@ $top5Post = top5WatchingCounter($conn);
         <div class="w-full cream shadow border rounded-lg">
           <div class="p-c flex items-center justify-between border-b flex-wrap gap-3">
             <div class="flex items-center gap-3">
-              <div class="heading capitalize"><?= $post['author']['username']; ?></div>
+              <?php
+              echo renderAvatar($post['user']['username'], $post['user']['photo'], 'avatar', 'Photo Profile');
+              ?>
+              <div class="heading capitalize"><?= $post['user']['username']; ?></div>
             </div>
             <div class="flex items-center gap-3 flex-wrap">
               <div class="capitalize px-6 py-1 font-medium border rounded shadow <?= $post['category']; ?>"><?= $post['category'] ?></div>
@@ -137,7 +162,7 @@ $top5Post = top5WatchingCounter($conn);
           <div class="p-c flex items-center gap-3 flex-wrap">
             <div class="px-6 py-1 flex gap-1 font-medium border shadow rounded blue">
               <img src="assets/icons/views.svg" alt="views">
-              <div><?= $post['watching_counter'] ?></div>
+              <div><?= $post['counter_views'] ?></div>
             </div>
           </div>
         </div>
