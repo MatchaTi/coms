@@ -14,7 +14,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
   $password = htmlspecialchars($_POST['password']);
   $result = login($nim, $password);
   if ($result['status']) {
-    echo nextDialog("login.php");
     $_SESSION['user'] = $result['data'];
     if ($result['data']['role'] == 'admin') {
       echo nextDialog("admin.php");
