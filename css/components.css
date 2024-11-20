@@ -125,6 +125,7 @@ button {
 .full-stack {
   background: var(--orange);
 }
+
 /* colors end */
 
 /* typography start */
@@ -164,6 +165,7 @@ button {
 .capitalize {
   text-transform: capitalize;
 }
+
 .heading-1 {
   font-size: 40px;
   font-weight: 800;
@@ -229,6 +231,7 @@ button {
 .capitalize {
   text-transform: capitalize;
 }
+
 /* typography end */
 
 /* margin start */
@@ -255,6 +258,7 @@ button {
 .mb-10 {
   margin-bottom: 40px;
 }
+
 /* margin end */
 
 /* padding start */
@@ -313,12 +317,14 @@ button {
 .p-6 {
   padding: 24px;
 }
+
 /* padding end */
 
 /* shadow start */
 .shadow {
   box-shadow: -1px 2px 0 #000;
 }
+
 /* shadow end */
 
 /* border start */
@@ -329,6 +335,7 @@ button {
 .border-b {
   border-bottom: 3px solid #000;
 }
+
 /* border end */
 
 /* border radius start */
@@ -343,6 +350,7 @@ button {
 .rounded-full {
   border-radius: 9999px;
 }
+
 /* border radius end */
 
 /* photo start */
@@ -399,6 +407,7 @@ button {
   object-fit: cover;
   overflow: hidden;
 }
+
 /* photo end */
 
 /* display start */
@@ -477,6 +486,7 @@ button {
 .order-2 {
   order: 2;
 }
+
 /* display end */
 
 /* dimension start */
@@ -519,6 +529,7 @@ button {
 .h-full {
   height: 100%;
 }
+
 /* dimension end */
 
 /* hover start */
@@ -530,22 +541,26 @@ button {
 .btn:hover {
   box-shadow: 0 2px 0 #000;
 }
+
 /*hover end*/
 
 /* focus start */
 .shadow:focus {
   box-shadow: 0 2px 0 #000;
 }
+
 /* focus end */
 
 /* cursor start */
 .cursor-pointer {
   cursor: pointer;
 }
+
 /* cursor end */
 
 /* position start */
 .relative {
   position: relative;
 }
+
 /* position end */

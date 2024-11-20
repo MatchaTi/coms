@@ -3,355 +3,355 @@ include 'connection.php';
 
 function register($nim, $username, $fullname, $email, $password, $ktm)
 {
-    global $conn;
+  global $conn;
 
-    if (strlen($nim) < 10) {
-        return [
-            "status" => false,
-            "message" => "NIM harus 10 karakter"
-        ];
+  if (strlen($nim) < 10) {
+    return [
+      "status" => false,
+      "message" => "NIM harus 10 karakter"
+    ];
+  }
+
+  $sql = "SELECT * FROM users WHERE nim='$nim'";
+  $result = $conn->query($sql);
+  if ($result->num_rows > 0) {
+    return [
+      "status" => false,
+      "message" => "NIM sudah terdaftar"
+    ];
+  }
+
+  $sql = "SELECT * FROM users WHERE username='$username'";
+  $result = $conn->query($sql);
+  if ($result->num_rows > 0) {
+    return [
+      "status" => false,
+      "message" => "Username sudah terdaftar"
+    ];
+  }
+
+  $sql = "SELECT * FROM users WHERE fullname='$fullname'";
+  $result = $conn->query($sql);
+  if ($result->num_rows > 0) {
+    return [
+      "status" => false,
+      "message" => "Nama lengkap sudah terdaftar"
+    ];
+  }
+
+  $sql = "SELECT * FROM users WHERE email='$email'";
+  $result = $conn->query($sql);
+  if ($result->num_rows > 0) {
+    return [
+      "status" => false,
+      "message" => "Email sudah terdaftar"
+    ];
+  }
+
+  if (strlen($password) < 4) {
+    return [
+      "status" => false,
+      "message" => "Password minimal 4 karakter"
+    ];
+  }
+
+  $ktmPath = null;
+
+  if (empty($ktm['name'])) {
+    return [
+      "status" => false,
+      "message" => "KTM harus diupload"
+    ];
+  }
+
+  if ($ktm['error'] == UPLOAD_ERR_OK) {
+    $ktmCheck = checkValidPhoto($ktm);
+    if (!$ktmCheck['status']) {
+      return $ktmCheck;
     }
 
-    $sql = "SELECT * FROM users WHERE nim='$nim'";
-    $result = $conn->query($sql);
-    if ($result->num_rows > 0) {
-        return [
-            "status" => false,
-            "message" => "NIM sudah terdaftar"
-        ];
+    $fileExtention = pathinfo($ktm['name'], PATHINFO_EXTENSION);
+    $uniqueName = uniqid("ktm_", true) . '.' . $fileExtention;
+    $uploadDir = 'uploads/ktm/';
+
+    if (!is_dir($uploadDir)) {
+      mkdir($uploadDir, 0777, true);
     }
 
-    $sql = "SELECT * FROM users WHERE username='$username'";
-    $result = $conn->query($sql);
-    if ($result->num_rows > 0) {
-        return [
-            "status" => false,
-            "message" => "Username sudah terdaftar"
-        ];
+    $ktmPath = $uploadDir . $uniqueName;
+
+    if (!move_uploaded_file($ktm['tmp_name'], $ktmPath)) {
+      return [
+        "status" => false,
+        "message" => "Gagal mengupload KTM"
+      ];
     }
+  }
 
-    $sql = "SELECT * FROM users WHERE fullname='$fullname'";
-    $result = $conn->query($sql);
-    if ($result->num_rows > 0) {
-        return [
-            "status" => false,
-            "message" => "Nama lengkap sudah terdaftar"
-        ];
-    }
-
-    $sql = "SELECT * FROM users WHERE email='$email'";
-    $result = $conn->query($sql);
-    if ($result->num_rows > 0) {
-        return [
-            "status" => false,
-            "message" => "Email sudah terdaftar"
-        ];
-    }
-
-    if (strlen($password) < 4) {
-        return [
-            "status" => false,
-            "message" => "Password minimal 4 karakter"
-        ];
-    }
-
-    $ktmPath = null;
-
-    if (empty($ktm['name'])) {
-        return [
-            "status" => false,
-            "message" => "KTM harus diupload"
-        ];
-    }
-
-    if ($ktm['error'] == UPLOAD_ERR_OK) {
-        $ktmCheck = checkValidPhoto($ktm);
-        if (!$ktmCheck['status']) {
-            return $ktmCheck;
-        }
-
-        $fileExtention = pathinfo($ktm['name'], PATHINFO_EXTENSION);
-        $uniqueName = uniqid("ktm_", true) . '.' . $fileExtention;
-        $uploadDir = 'uploads/ktm/';
-
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
-
-        $ktmPath = $uploadDir . $uniqueName;
-
-        if (!move_uploaded_file($ktm['tmp_name'], $ktmPath)) {
-            return [
-                "status" => false,
-                "message" => "Gagal mengupload KTM"
-            ];
-        }
-    }
-
-    $passwordHash = password_hash($password, PASSWORD_DEFAULT);
-    $sql = "INSERT INTO users (nim, username, fullname,email, password, ktm) VALUES ('$nim', '$username', '$fullname','$email', '$passwordHash', '$ktmPath')";
-    $result = $conn->query($sql);
-    if ($result) {
-        return [
-            "status" => true,
-            "message" => "Registrasi berhasil"
-        ];
-    } else {
-        return [
-            "status" => false,
-            "message" => "Registrasi gagal"
-        ];
-    }
+  $passwordHash = password_hash($password, PASSWORD_DEFAULT);
+  $sql = "INSERT INTO users (nim, username, fullname,email, password, ktm) VALUES ('$nim', '$username', '$fullname','$email', '$passwordHash', '$ktmPath')";
+  $result = $conn->query($sql);
+  if ($result) {
+    return [
+      "status" => true,
+      "message" => "Registrasi berhasil"
+    ];
+  } else {
+    return [
+      "status" => false,
+      "message" => "Registrasi gagal"
+    ];
+  }
 }
 
 function login($nim, $password)
 {
-    global $conn;
+  global $conn;
 
-    $sql = "SELECT nim, username, password, photo, role, status FROM users WHERE nim='$nim'";
-    $result = $conn->query($sql);
-    if ($result->num_rows == 0) {
-        return [
-            "status" => false,
-            "message" => "NIM tidak terdaftar"
-        ];
-    }
-
-    $user = $result->fetch_assoc();
-
-    if (!password_verify($password, $user['password'])) {
-        return [
-            "status" => false,
-            "message" => "Password salah"
-        ];
-    }
-
-    if (!$user['status']) {
-        return [
-            "status" => false,
-            "message" => "Akun belum aktif"
-        ];
-    }
-
+  $sql = "SELECT nim, username, password, photo, role, status FROM users WHERE nim='$nim'";
+  $result = $conn->query($sql);
+  if ($result->num_rows == 0) {
     return [
-        "status" => true,
-        "message" => "Login berhasil",
-        "data" => [
-            "nim" => $user['nim'],
-            "username" => $user['username'],
-            "photo" => $user['photo'],
-            "role" => $user['role']
-        ]
+      "status" => false,
+      "message" => "NIM tidak terdaftar"
     ];
+  }
+
+  $user = $result->fetch_assoc();
+
+  if (!password_verify($password, $user['password'])) {
+    return [
+      "status" => false,
+      "message" => "Password salah"
+    ];
+  }
+
+  if (!$user['status']) {
+    return [
+      "status" => false,
+      "message" => "Akun belum aktif"
+    ];
+  }
+
+  return [
+    "status" => true,
+    "message" => "Login berhasil",
+    "data" => [
+      "nim" => $user['nim'],
+      "username" => $user['username'],
+      "photo" => $user['photo'],
+      "role" => $user['role']
+    ]
+  ];
 }
 
 function checkValidPhoto($imgFile)
 {
-    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-    if (!in_array($imgFile['type'], $allowedTypes)) {
-        return [
-            "status" => false,
-            "message" => "Only JPEG, PNG, and GIF images are allowed."
-        ];
-    }
-
-    $maxSize = 2 * 1024 * 1024; // 2MB
-    if ($imgFile['size'] > $maxSize) {
-        return [
-            "status" => false,
-            "message" => "Ukuran file maksimal 2MB"
-        ];
-    }
-
+  $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
+  if (!in_array($imgFile['type'], $allowedTypes)) {
     return [
-        "status" => true,
-        "message" => "Valid image."
+      "status" => false,
+      "message" => "Only JPEG, PNG, and GIF images are allowed."
     ];
+  }
+
+  $maxSize = 2 * 1024 * 1024; // 2MB
+  if ($imgFile['size'] > $maxSize) {
+    return [
+      "status" => false,
+      "message" => "Ukuran file maksimal 2MB"
+    ];
+  }
+
+  return [
+    "status" => true,
+    "message" => "Valid image."
+  ];
 }
 
 function getAllUsers($pagination = false, $page = 1, $limit = 8)
 {
-    global $conn;
+  global $conn;
 
-    $offset = ($page - 1) * $limit;
-    $sql = "SELECT * FROM users WHERE role = 'user' ORDER BY nim";
-    if ($pagination) {
-        $sql .= " LIMIT $limit OFFSET $offset";
+  $offset = ($page - 1) * $limit;
+  $sql = "SELECT * FROM users WHERE role = 'user' ORDER BY nim";
+  if ($pagination) {
+    $sql .= " LIMIT $limit OFFSET $offset";
+  }
+  $result = $conn->query($sql);
+  $users = [];
+  if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+      $users[] = [
+        "nim" => $row['nim'],
+        "username" => $row['username'],
+        "fullname" => $row['fullname'],
+        "email" => $row['email'],
+        "ktm" => $row['ktm'],
+        "photo" => $row['photo'],
+        "status" => $row['status']
+      ];
     }
-    $result = $conn->query($sql);
-    $users = [];
-    if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $users[] = [
-                "nim" => $row['nim'],
-                "username" => $row['username'],
-                "fullname" => $row['fullname'],
-                "email" => $row['email'],
-                "ktm" => $row['ktm'],
-                "photo" => $row['photo'],
-                "status" => $row['status']
-            ];
-        }
-    }
+  }
 
-    return $users;
+  return $users;
 }
 function updateStatusUser($nim)
 {
-    global $conn;
+  global $conn;
 
-    $sql = "UPDATE users SET status = 1 WHERE nim = $nim";
-    $result = $conn->query($sql);
-    if ($result) {
-        return [
-            "status" => true,
-            "message" => "User berhasil diaktifkan"
-        ];
-    } else {
-        return [
-            "status" => false,
-            "message" => "User gagal diaktifkan"
-        ];
-    }
+  $sql = "UPDATE users SET status = 1 WHERE nim = $nim";
+  $result = $conn->query($sql);
+  if ($result) {
+    return [
+      "status" => true,
+      "message" => "User berhasil diaktifkan"
+    ];
+  } else {
+    return [
+      "status" => false,
+      "message" => "User gagal diaktifkan"
+    ];
+  }
 }
 
 function rejectStatusUser($nim)
 {
-    global $conn;
+  global $conn;
 
-    $sql = "DELETE FROM users WHERE nim = $nim";
-    $result = $conn->query($sql);
-    if ($result) {
-        return [
-            "status" => true,
-            "message" => "User berhasil ditolak"
-        ];
-    } else {
-        return [
-            "status" => false,
-            "message" => "User gagal ditolak"
-        ];
-    }
+  $sql = "DELETE FROM users WHERE nim = $nim";
+  $result = $conn->query($sql);
+  if ($result) {
+    return [
+      "status" => true,
+      "message" => "User berhasil ditolak"
+    ];
+  } else {
+    return [
+      "status" => false,
+      "message" => "User gagal ditolak"
+    ];
+  }
 }
 
 function deleteUser($nim)
 {
-    global $conn;
+  global $conn;
 
-    $sql = "DELETE FROM users WHERE nim = $nim";
-    $result = $conn->query($sql);
-    if ($result) {
-        return [
-            "status" => true,
-            "message" => "User berhasil dihapus"
-        ];
-    } else {
-        return [
-            "status" => false,
-            "message" => "User gagal dihapus"
-        ];
-    }
+  $sql = "DELETE FROM users WHERE nim = $nim";
+  $result = $conn->query($sql);
+  if ($result) {
+    return [
+      "status" => true,
+      "message" => "User berhasil dihapus"
+    ];
+  } else {
+    return [
+      "status" => false,
+      "message" => "User gagal dihapus"
+    ];
+  }
 }
 
 function searchUser($name)
 {
-    global $conn;
+  global $conn;
 
-    $sql = "SELECT * FROM users WHERE fullname LIKE '%$name%' OR username LIKE '%$name%' OR nim LIKE '%$name%' HAVING role = 'user'";
-    $result = $conn->query($sql);
-    $users = [];
-    if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $users[] = [
-                "nim" => $row['nim'],
-                "username" => $row['username'],
-                "fullname" => $row['fullname'],
-                "email" => $row['email'],
-                "ktm" => $row['ktm'],
-                "photo" => $row['photo'],
-                "status" => $row['status']
-            ];
-        }
+  $sql = "SELECT * FROM users WHERE fullname LIKE '%$name%' OR username LIKE '%$name%' OR nim LIKE '%$name%' HAVING role = 'user'";
+  $result = $conn->query($sql);
+  $users = [];
+  if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+      $users[] = [
+        "nim" => $row['nim'],
+        "username" => $row['username'],
+        "fullname" => $row['fullname'],
+        "email" => $row['email'],
+        "ktm" => $row['ktm'],
+        "photo" => $row['photo'],
+        "status" => $row['status']
+      ];
     }
+  }
 
-    return $users;
+  return $users;
 }
 
 function getSingleUser($nim)
 {
-    global $conn;
+  global $conn;
 
-    $sql = "SELECT * FROM users WHERE nim = $nim AND role = 'user'";
-    $result = $conn->query($sql);
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        return [
-            "nim" => $row['nim'],
-            "username" => $row['username'],
-            "fullname" => $row['fullname'],
-            "email" => $row['email'],
-            "ktm" => $row['ktm'],
-            "photo" => $row['photo'],
-            "status" => $row['status'],
-            "role" => $row['role'],
-            "joined_at" => $row['joined_at']
-        ];
-    }
+  $sql = "SELECT * FROM users WHERE nim = $nim AND role = 'user'";
+  $result = $conn->query($sql);
+  if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    return [
+      "nim" => $row['nim'],
+      "username" => $row['username'],
+      "fullname" => $row['fullname'],
+      "email" => $row['email'],
+      "ktm" => $row['ktm'],
+      "photo" => $row['photo'],
+      "status" => $row['status'],
+      "role" => $row['role'],
+      "joined_at" => $row['joined_at']
+    ];
+  }
 
-    return null;
+  return null;
 }
 
 function addPost($userNIM, $title, $description, $category, $photo = null)
 {
-    global $conn;
+  global $conn;
 
-    $photoPath = null;
+  $photoPath = null;
 
-    if ($photo['error'] == UPLOAD_ERR_OK) {
-        $photoCheck = checkValidPhoto($photo);
-        if (!$photoCheck['status']) {
-            return $photoCheck;
-        }
-
-        $fileExtention = pathinfo($photo['name'], PATHINFO_EXTENSION);
-        $uniqueName = uniqid("post_", true) . '.' . $fileExtention;
-        $uploadDir = 'uploads/posts/';
-
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
-
-        $photoPath = $uploadDir . $uniqueName;
-
-        if (!move_uploaded_file($photo['tmp_name'], $photoPath)) {
-            return [
-                "status" => false,
-                "message" => "Gagal mengupload foto"
-            ];
-        }
+  if ($photo['error'] == UPLOAD_ERR_OK) {
+    $photoCheck = checkValidPhoto($photo);
+    if (!$photoCheck['status']) {
+      return $photoCheck;
     }
 
-    $sql = "INSERT INTO posts (user_nim, title, description, category_id, photo) VALUES ('$userNIM', '$title', '$description', '$category', '$photoPath')";
-    $result = $conn->query($sql);
-    if ($result) {
-        return [
-            "status" => true,
-            "message" => "Post berhasil ditambahkan, menunggu verifikasi admin!"
-        ];
-    } else {
-        return [
-            "status" => false,
-            "message" => "Post gagal ditambahkan!"
-        ];
+    $fileExtention = pathinfo($photo['name'], PATHINFO_EXTENSION);
+    $uniqueName = uniqid("post_", true) . '.' . $fileExtention;
+    $uploadDir = 'uploads/posts/';
+
+    if (!is_dir($uploadDir)) {
+      mkdir($uploadDir, 0777, true);
     }
+
+    $photoPath = $uploadDir . $uniqueName;
+
+    if (!move_uploaded_file($photo['tmp_name'], $photoPath)) {
+      return [
+        "status" => false,
+        "message" => "Gagal mengupload foto"
+      ];
+    }
+  }
+
+  $sql = "INSERT INTO posts (user_nim, title, description, category_id, photo) VALUES ('$userNIM', '$title', '$description', '$category', '$photoPath')";
+  $result = $conn->query($sql);
+  if ($result) {
+    return [
+      "status" => true,
+      "message" => "Post berhasil ditambahkan, menunggu verifikasi admin!"
+    ];
+  } else {
+    return [
+      "status" => false,
+      "message" => "Post gagal ditambahkan!"
+    ];
+  }
 }
 
 function getAllPosts($pagination = false, $page = 1, $limit = 4)
 {
-    global $conn;
+  global $conn;
 
-    $offset = ($page - 1) * $limit;
-    $sql = "SELECT 
+  $offset = ($page - 1) * $limit;
+  $sql = "SELECT 
                 p.id, p.title, p.description, p.photo, p.created_at, p.status, p.counter_views, 
                 u.nim, u.username, u.photo AS photoUser, 
                 c.name,
@@ -360,100 +360,100 @@ function getAllPosts($pagination = false, $page = 1, $limit = 4)
             JOIN users u on p.user_nim = u.nim
            JOIN categories c on p.category_id = c.id";
 
-    if ($pagination) {
-        $sql .= " ORDER BY p.created_at DESC LIMIT $limit OFFSET $offset";
-    } else {
-        $sql .= " ORDER BY p.created_at DESC";
-    }
+  if ($pagination) {
+    $sql .= " ORDER BY p.created_at DESC LIMIT $limit OFFSET $offset";
+  } else {
+    $sql .= " ORDER BY p.created_at DESC";
+  }
 
-    $result = $conn->query($sql);
-    $posts = [];
-    if ($result->num_rows > 0) {
-        while ($row = $result->fetch_assoc()) {
-            $posts[] = [
-                "id" => $row['id'],
-                "title" => $row['title'],
-                "description" => $row['description'],
-                "photo" => $row['photo'],
-                "category" => $row['name'],
-                "user" => [
-                    "nim" => $row['nim'],
-                    "username" => $row['username'],
-                    "photo" => $row['photoUser']
-                ],
-                "created_at" => $row['created_at'],
-                "status" => $row['status'],
-                "total_comments" => $row['total_comments'],
-                "counter_views" => $row['counter_views']
-            ];
-        }
+  $result = $conn->query($sql);
+  $posts = [];
+  if ($result->num_rows > 0) {
+    while ($row = $result->fetch_assoc()) {
+      $posts[] = [
+        "id" => $row['id'],
+        "title" => $row['title'],
+        "description" => $row['description'],
+        "photo" => $row['photo'],
+        "category" => $row['name'],
+        "user" => [
+          "nim" => $row['nim'],
+          "username" => $row['username'],
+          "photo" => $row['photoUser']
+        ],
+        "created_at" => $row['created_at'],
+        "status" => $row['status'],
+        "total_comments" => $row['total_comments'],
+        "counter_views" => $row['counter_views']
+      ];
     }
+  }
 
-    return $posts;
+  return $posts;
 }
 
 function approvePost($id)
 {
-    global $conn;
+  global $conn;
 
-    $sql = "UPDATE posts SET status = 1 WHERE id = $id";
-    $result = $conn->query($sql);
-    if ($result) {
-        return [
-            "status" => true,
-            "message" => "Post berhasil diapprove"
-        ];
-    } else {
-        return [
-            "status" => false,
-            "message" => "Post gagal diapprove"
-        ];
-    }
+  $sql = "UPDATE posts SET status = 1 WHERE id = $id";
+  $result = $conn->query($sql);
+  if ($result) {
+    return [
+      "status" => true,
+      "message" => "Post berhasil diapprove"
+    ];
+  } else {
+    return [
+      "status" => false,
+      "message" => "Post gagal diapprove"
+    ];
+  }
 }
 
 function rejectPost($id)
 {
-    global $conn;
+  global $conn;
 
-    $sql = "DELETE FROM posts WHERE id = $id";
-    $result = $conn->query($sql);
-    if ($result) {
-        return [
-            "status" => true,
-            "message" => "Post berhasil direject"
-        ];
-    } else {
-        return [
-            "status" => false,
-            "message" => "Post gagal direject"
-        ];
-    }
+  $sql = "DELETE FROM posts WHERE id = $id";
+  $result = $conn->query($sql);
+  if ($result) {
+    return [
+      "status" => true,
+      "message" => "Post berhasil direject"
+    ];
+  } else {
+    return [
+      "status" => false,
+      "message" => "Post gagal direject"
+    ];
+  }
 }
 
 function deletePost($id)
 {
-    global $conn;
+  global $conn;
 
-    $sql = "DELETE FROM posts WHERE id = $id";
-    $result = $conn->query($sql);
-    if ($result) {
-        return [
-            "status" => true,
-            "message" => "Post berhasil dihapus"
-        ];
-    } else {
-        return [
-            "status" => false,
-            "message" => "Post gagal dihapus"
-        ];
-    }
+  $sql = "DELETE FROM posts WHERE id = $id";
+  $result = $conn->query($sql);
+  if ($result) {
+    return [
+      "status" => true,
+      "message" => "Post berhasil dihapus"
+    ];
+  } else {
+    return [
+      "status" => false,
+      "message" => "Post gagal dihapus"
+    ];
+  }
 }
 
 function getSinglePost($id)
 {
-    global $conn;
+  global $conn;
 
-    $sql = "SELECT 
+  $sql = "SELECT 
                 p.id, p.title, p.description, p.photo, p.created_at, p.status, p.counter_views, 
                 u.nim, u.username, u.photo AS photoUser, 
                 c.name,
@@ -463,179 +463,179 @@ function getSinglePost($id)
             JOIN categories c on p.category_id = c.id
             WHERE p.id = $id";
 
-    $result = $conn->query($sql);
+  $result = $conn->query($sql);
 
-    $sqlComments = "SELECT c.id, c.content, c.created_at, u.nim, u.username, u.photo 
+  $sqlComments = "SELECT c.id, c.content, c.created_at, u.nim, u.username, u.photo 
                     FROM comments c JOIN users u ON c.user_nim = u.nim 
                     WHERE c.post_id = $id ORDER BY c.created_at DESC";
 
-    $resultComments = $conn->query($sqlComments);
+  $resultComments = $conn->query($sqlComments);
 
-    $comments = [];
-    if ($resultComments->num_rows > 0) {
-        while ($rowComment = $resultComments->fetch_assoc()) {
-            $comments[] = [
-                "id" => $rowComment['id'],
-                "content" => $rowComment['content'],
-                "created_at" => $rowComment['created_at'],
-                "user" => [
-                    "nim" => $rowComment['nim'],
-                    "username" => $rowComment['username'],
-                    "photo" => $rowComment['photo']
-                ]
-            ];
-        }
+  $comments = [];
+  if ($resultComments->num_rows > 0) {
+    while ($rowComment = $resultComments->fetch_assoc()) {
+      $comments[] = [
+        "id" => $rowComment['id'],
+        "content" => $rowComment['content'],
+        "created_at" => $rowComment['created_at'],
+        "user" => [
+          "nim" => $rowComment['nim'],
+          "username" => $rowComment['username'],
+          "photo" => $rowComment['photo']
+        ]
+      ];
     }
+  }
 
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        return [
-            "id" => $row['id'],
-            "title" => $row['title'],
-            "description" => $row['description'],
-            "photo" => $row['photo'],
-            "category" => $row['name'],
-            "user" => [
-                "nim" => $row['nim'],
-                "username" => $row['username'],
-                "photo" => $row['photoUser']
-            ],
-            "created_at" => $row['created_at'],
-            "status" => $row['status'],
-            "total_comments" => $row['total_comments'],
-            "counter_views" => $row['counter_views'],
-            "comments" => $comments
-        ];
-    }
+  if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    return [
+      "id" => $row['id'],
+      "title" => $row['title'],
+      "description" => $row['description'],
+      "photo" => $row['photo'],
+      "category" => $row['name'],
+      "user" => [
+        "nim" => $row['nim'],
+        "username" => $row['username'],
+        "photo" => $row['photoUser']
+      ],
+      "created_at" => $row['created_at'],
+      "status" => $row['status'],
+      "total_comments" => $row['total_comments'],
+      "counter_views" => $row['counter_views'],
+      "comments" => $comments
+    ];
+  }
 }
 
 function getTotalUsers()
 {
-    global $conn;
+  global $conn;
 
-    $sql = "SELECT COUNT(*) AS total FROM users WHERE role = 'user'";
-    $result = $conn->query($sql);
-    $row = $result->fetch_assoc();
-    return $row['total'];
+  $sql = "SELECT COUNT(*) AS total FROM users WHERE role = 'user'";
+  $result = $conn->query($sql);
+  $row = $result->fetch_assoc();
+  return $row['total'];
 }
 
 function getTotalPosts()
 {
-    global $conn;
+  global $conn;
 
-    $sql = "SELECT COUNT(*) AS total FROM posts WHERE status = 1";
-    $result = $conn->query($sql);
-    $row = $result->fetch_assoc();
-    return $row['total'];
+  $sql = "SELECT COUNT(*) AS total FROM posts WHERE status = 1";
+  $result = $conn->query($sql);
+  $row = $result->fetch_assoc();
+  return $row['total'];
 }
 
 function addComment($postId, $userNim, $content)
 {
-    global $conn;
-    if (empty($content)) {
-        return [
-            "status" => false,
-            "message" => "Comments cannot be empty."
-        ];
-    }
-
-    $sql = "INSERT INTO comments(content, user_nim, post_id) VALUES('$content', '$userNim', '$postId')";
-    $result = $conn->query($sql);
-    if ($result) {
-        return [
-            "status" => true,
-            "message" => "Comment success added!"
-        ];
-    }
-
+  global $conn;
+  if (empty($content)) {
     return [
-        "status" => false,
-        "message" => "Comment failed added!"
+      "status" => false,
+      "message" => "Comments cannot be empty."
     ];
+  }
+
+  $sql = "INSERT INTO comments(content, user_nim, post_id) VALUES('$content', '$userNim', '$postId')";
+  $result = $conn->query($sql);
+  if ($result) {
+    return [
+      "status" => true,
+      "message" => "Comment success added!"
+    ];
+  }
+
+  return [
+    "status" => false,
+    "message" => "Comment failed added!"
+  ];
 }
 function incrementWatchingCounter($id)
 {
-    global $conn;
+  global $conn;
 
-    $sql = "UPDATE posts SET counter_views = counter_views + 1 WHERE id = $id";
-    $conn->query($sql);
+  $sql = "UPDATE posts SET counter_views = counter_views + 1 WHERE id = $id";
+  $conn->query($sql);
 }
 
 function editPost($postId, $title, $content, $categoryId, $imgFile, $removePhoto)
 {
-    global $conn;
-    if (empty($title) || empty($content) || empty($categoryId)) {
-        return [
-            "status" => false,
-            "message" => "Title, Content, and Category cannot be empty."
-        ];
-    }
-
-    $existingPhoto = null;
-
-    $sql = "SELECT photo FROM posts WHERE id = $postId";
-    $result = $conn->query($sql);
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        $existingPhoto = $row['photo'];
-    }
-
-    if ($removePhoto) {
-        if ($existingPhoto && file_exists($existingPhoto)) {
-            unlink($existingPhoto);
-        }
-        $imagePath = null;
-    } elseif ($imgFile && $imgFile['error'] == UPLOAD_ERR_OK) {
-        $photoCheck = checkValidPhoto($imgFile);
-        if (!$photoCheck['status']) {
-            return $photoCheck;
-        }
-
-        if ($existingPhoto && file_exists($existingPhoto)) {
-            unlink($existingPhoto);
-        }
-
-        $fileExtension = strtolower(pathinfo($imgFile['name'], PATHINFO_EXTENSION));
-        $uniqueName = uniqid("post_", true) . "." . $fileExtension;
-        $uploadDir = 'uploads/posts/';
-
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
-
-        $imagePath = $uploadDir . $uniqueName;
-        $imagePath = $uploadDir . basename($imgFile['name']);
-        if (!move_uploaded_file($imgFile['tmp_name'], $imagePath)) {
-            return [
-                "status" => false,
-                "message" => "Failed to upload new image."
-            ];
-        }
-    }
-
-    $sql = "UPDATE posts SET title = '$title', description = '$content', category_id = $categoryId, photo = '$imagePath', status = 0 WHERE id = $postId";
-    $result = $conn->query($sql);
-    if (!$result) {
-        return [
-            "status" => false,
-            "message" => "Failed to update post."
-        ];
-    }
-
+  global $conn;
+  if (empty($title) || empty($content) || empty($categoryId)) {
     return [
-        "status" => true,
-        "message" => "Post updated successfully, please wait for admin confirmation!"
+      "status" => false,
+      "message" => "Title, Content, and Category cannot be empty."
     ];
+  }
+
+  $existingPhoto = null;
+
+  $sql = "SELECT photo FROM posts WHERE id = $postId";
+  $result = $conn->query($sql);
+  if ($result->num_rows > 0) {
+    $row = $result->fetch_assoc();
+    $existingPhoto = $row['photo'];
+  }
+
+  if ($removePhoto) {
+    if ($existingPhoto && file_exists($existingPhoto)) {
+      unlink($existingPhoto);
+    }
+    $imagePath = null;
+  } elseif ($imgFile && $imgFile['error'] == UPLOAD_ERR_OK) {
+    $photoCheck = checkValidPhoto($imgFile);
+    if (!$photoCheck['status']) {
+      return $photoCheck;
+    }
+
+    if ($existingPhoto && file_exists($existingPhoto)) {
+      unlink($existingPhoto);
+    }
+
+    $fileExtension = strtolower(pathinfo($imgFile['name'], PATHINFO_EXTENSION));
+    $uniqueName = uniqid("post_", true) . "." . $fileExtension;
+    $uploadDir = 'uploads/posts/';
+
+    if (!is_dir($uploadDir)) {
+      mkdir($uploadDir, 0777, true);
+    }
+
+    $imagePath = $uploadDir . $uniqueName;
+    $imagePath = $uploadDir . basename($imgFile['name']);
+    if (!move_uploaded_file($imgFile['tmp_name'], $imagePath)) {
+      return [
+        "status" => false,
+        "message" => "Failed to upload new image."
+      ];
+    }
+  }
+
+  $sql = "UPDATE posts SET title = '$title', description = '$content', category_id = $categoryId, photo = '$imagePath', status = 0 WHERE id = $postId";
+  $result = $conn->query($sql);
+  if (!$result) {
+    return [
+      "status" => false,
+      "message" => "Failed to update post."
+    ];
+  }
+
+  return [
+    "status" => true,
+    "message" => "Post updated successfully, please wait for admin confirmation!"
+  ];
 }
 
 function getProfileUser($nim)
 {
-    global $conn;
+  global $conn;
 
-    $sqlUser = "SELECT * FROM users WHERE nim = $nim";
-    $resultUser = $conn->query($sqlUser);
-    $user = $resultUser->fetch_assoc();
-    $sqlPosts = "SELECT 
+  $sqlUser = "SELECT * FROM users WHERE nim = $nim";
+  $resultUser = $conn->query($sqlUser);
+  $user = $resultUser->fetch_assoc();
+  $sqlPosts = "SELECT 
                 p.id, p.title, p.description, p.photo, p.created_at, p.status, p.counter_views, 
                 u.nim, u.username, u.photo AS photoUser, 
                 c.name,
@@ -645,111 +645,110 @@ function getProfileUser($nim)
                 JOIN categories c on p.category_id = c.id
                 WHERE u.nim = $nim
                 ORDER BY p.created_at DESC";
-    $resultPosts = $conn->query($sqlPosts);
-    $posts = [];
-    if ($resultPosts->num_rows > 0) {
-        while ($row = $resultPosts->fetch_assoc()) {
-            $posts[] = [
-                "id" => $row['id'],
-                "title" => $row['title'],
-                "description" => $row['description'],
-                "photo" => $row['photo'],
-                "category" => $row['name'],
-                "created_at" => $row['created_at'],
-                "status" => $row['status'],
-                "total_comments" => $row['total_comments'],
-                "counter_views" => $row['counter_views']
-            ];
-        }
+  $resultPosts = $conn->query($sqlPosts);
+  $posts = [];
+  if ($resultPosts->num_rows > 0) {
+    while ($row = $resultPosts->fetch_assoc()) {
+      $posts[] = [
+        "id" => $row['id'],
+        "title" => $row['title'],
+        "description" => $row['description'],
+        "photo" => $row['photo'],
+        "category" => $row['name'],
+        "created_at" => $row['created_at'],
+        "status" => $row['status'],
+        "total_comments" => $row['total_comments'],
+        "counter_views" => $row['counter_views']
+      ];
     }
+  }
 
-    return [
-        "status" => true,
-        "user" => $user,
-        "posts" => $posts
-    ];
+  return [
+    "status" => true,
+    "user" => $user,
+    "posts" => $posts
+  ];
 }
 
 function editProfile($nim, $username, $fullname, $bio, $newPassword, $password, $photoProfile, $linkInstagram, $linkFacebook, $linkGithub, $linkLinkedin, $deletePhotoProfile = false)
 {
-    global $conn;
+  global $conn;
 
-    $allUsers = "SELECT username, fullname FROM users";
-    $resultAllUsers = $conn->query($allUsers);
-    $user = "SELECT username, fullname, password, photo FROM users WHERE nim = $nim";
-    $resultUser = $conn->query($user);
-    $rowUser = $resultUser->fetch_assoc();
-    while ($row = $resultAllUsers->fetch_assoc()) {
-        if ($username == $row['username'] && $username != $rowUser['username']) {
-            return [
-                "status" => false,
-                "message" => "Username already exists"
-            ];
-        }
-        if ($fullname == $row['fullname'] && $fullname != $rowUser['fullname']) {
-            return [
-                "status" => false,
-                "message" => "Fullname already exists"
-            ];
-        }
+  $allUsers = "SELECT username, fullname FROM users";
+  $resultAllUsers = $conn->query($allUsers);
+  $user = "SELECT username, fullname, password, photo FROM users WHERE nim = $nim";
+  $resultUser = $conn->query($user);
+  $rowUser = $resultUser->fetch_assoc();
+  while ($row = $resultAllUsers->fetch_assoc()) {
+    if ($username == $row['username'] && $username != $rowUser['username']) {
+      return [
+        "status" => false,
+        "message" => "Username already exists"
+      ];
+    }
+    if ($fullname == $row['fullname'] && $fullname != $rowUser['fullname']) {
+      return [
+        "status" => false,
+        "message" => "Fullname already exists"
+      ];
+    }
+  }
+
+  if (!password_verify($password, $rowUser['password'])) {
+    return [
+      "status" => false,
+      "message" => "Password is incorrect"
+    ];
+  }
+
+  $existingPhoto = $rowUser['photo'];
+  $imagePath = $existingPhoto;
+
+  if ($deletePhotoProfile) {
+    if ($existingPhoto && file_exists($existingPhoto)) {
+      unlink($existingPhoto);
+    }
+    $imagePath = null;
+  } elseif ($photoProfile && $photoProfile['error'] == UPLOAD_ERR_OK) {
+    $photoCheck = checkValidPhoto($photoProfile);
+    if (!$photoCheck['status']) {
+      return $photoCheck;
     }
 
-    if (!password_verify($password, $rowUser['password'])) {
-        return [
-            "status" => false,
-            "message" => "Password is incorrect"
-        ];
+    if ($existingPhoto && file_exists($existingPhoto)) {
+      unlink($existingPhoto);
     }
 
-    $existingPhoto = $rowUser['photo'];
-    $imagePath = $existingPhoto;
+    $fileExtension = strtolower(pathinfo($photoProfile['name'], PATHINFO_EXTENSION));
+    $uniqueName = uniqid("profile_", true) . "." . $fileExtension;
+    $uploadDir = "uploads/profile/";
 
-    if ($deletePhotoProfile) {
-        if ($existingPhoto && file_exists($existingPhoto)) {
-            unlink($existingPhoto);
-        }
-        $imagePath = null;
-    } elseif ($photoProfile && $photoProfile['error'] == UPLOAD_ERR_OK) {
-        $photoCheck = checkValidPhoto($photoProfile);
-        if (!$photoCheck['status']) {
-            return $photoCheck;
-        }
-
-        if ($existingPhoto && file_exists($existingPhoto)) {
-            unlink($existingPhoto);
-        }
-
-        $fileExtension = strtolower(pathinfo($photoProfile['name'], PATHINFO_EXTENSION));
-        $uniqueName = uniqid("profile_", true) . "." . $fileExtension;
-        $uploadDir = "uploads/profile/";
-
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
-
-        $imagePath = $uploadDir . $uniqueName;
-        if (!move_uploaded_file($photoProfile['tmp_name'], $imagePath)) {
-            return [
-                "status" => false,
-                "message" => "Failed to upload new image."
-            ];
-        }
+    if (!is_dir($uploadDir)) {
+      mkdir($uploadDir, 0777, true);
     }
 
-    $newPassword = $newPassword ? password_hash($newPassword, PASSWORD_DEFAULT) : $rowUser['password'];
-
-    $sql = "UPDATE users SET username = '$username', fullname = '$fullname', bio = '$bio', password = '$newPassword', photo = '$imagePath', link_instagram = '$linkInstagram', link_facebook = '$linkFacebook', link_github = '$linkGithub', link_linkedin = '$linkLinkedin' WHERE nim = $nim";
-    $result = $conn->query($sql);
-    if ($result) {
-        return [
-            "status" => true,
-            "message" => "Profile updated successfully"
-        ];
-    } else {
-        return [
-            "status" => false,
-            "message" => "Failed to update profile"
-        ];
+    $imagePath = $uploadDir . $uniqueName;
+    if (!move_uploaded_file($photoProfile['tmp_name'], $imagePath)) {
+      return [
+        "status" => false,
+        "message" => "Failed to upload new image."
+      ];
     }
+  }
+
+  $newPassword = $newPassword ? password_hash($newPassword, PASSWORD_DEFAULT) : $rowUser['password'];
+
+  $sql = "UPDATE users SET username = '$username', fullname = '$fullname', bio = '$bio', password = '$newPassword', photo = '$imagePath', link_instagram = '$linkInstagram', link_facebook = '$linkFacebook', link_github = '$linkGithub', link_linkedin = '$linkLinkedin' WHERE nim = $nim";
+  $result = $conn->query($sql);
+  if ($result) {
+    return [
+      "status" => true,
+      "message" => "Profile updated successfully"
+    ];
+  } else {
+    return [
+      "status" => false,
+      "message" => "Failed to update profile"
+    ];
+  }
 }
-?>
