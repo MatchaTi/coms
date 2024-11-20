@@ -3,6 +3,7 @@ include 'includes/connection.php';
 include 'includes/functions.php';
 include 'components/avatar.php';
 include 'components/dialog.php';
+include 'components/nextDialog.php';
 
 session_start();
 
@@ -17,7 +18,14 @@ if (isset($_POST['comment'])) {
   $content = $_POST['content'];
 
   $result = addComment($postId, $userNim, $content);
-  echo "<script>alert('" . $result['message'] . "');</script>";
+  echo nextDialog("");
+  echo "<script src='js/nextDialog.js'></script>";
+  echo "<script> 
+    next(
+        'Add Post', 
+        '" . $result['message'] . "'
+    );
+    </script>";
 }
 
 
