@@ -572,12 +572,13 @@ function editPost($postId, $title, $content, $categoryId, $imgFile, $removePhoto
   }
 
   $existingPhoto = null;
-
+  $imagePath = null;
   $sql = "SELECT photo FROM posts WHERE id = $postId";
   $result = $conn->query($sql);
   if ($result->num_rows > 0) {
     $row = $result->fetch_assoc();
     $existingPhoto = $row['photo'];
+    $imagePath = $existingPhoto;
   }
 
   if ($removePhoto) {
