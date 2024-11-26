@@ -94,22 +94,24 @@ $top5Post = top5WatchingCounter();
   </form>
 
   <?php if (isset($searchResult)): ?>
-    <h2 class="heading text-center mb-6">Users</h2>
+    <h2 class="heading mb-6">Result Users</h2>
     <?php if (count($searchResult['users']) > 0): ?>
       <?php foreach ($searchResult['users'] as $user): ?>
-        <a href="profile.php?nim=<?= $user['nim'] ?>" class="flex gap-6 items-center mb-6">
-          <?php
-          echo renderAvatar($user['username'], $user['photo'], 'avatar', 'Photo Profile');
-          ?>
-          <span class="w-full p-c cream shadow border rounded-full"><?= $user['username'] ?></span>
-        </a>
+        <div class="w-full p-c cream shadow border rounded-lg mb-6">
+          <a href="profile.php?nim=<?= $user['nim'] ?>" class="flex gap-6 items-center">
+            <?php
+            echo renderAvatar($user['username'], $user['photo'], 'avatar', 'Photo Profile');
+            ?>
+            <span class="font-bold"><?= $user['username'] ?></span>
+          </a>
+        </div>
       <?php endforeach ?>
     <?php else: ?>
       <section class="flex gap-6 items-center mb-6">
         <div class="w-full p-c cream shadow border rounded-full">No users match!</div>
       </section>
     <?php endif ?>
-    <h2 class="heading text-center mb-6">Posts</h2>
+    <h2 class="heading mb-6">Result Posts</h2>
     <?php if (count($searchResult['posts']) > 0): ?>
       <?php foreach ($searchResult['posts'] as $post): ?>
         <a href="post.php?id=<?= $post['id'] ?>" class="flex gap-6 mb-6">

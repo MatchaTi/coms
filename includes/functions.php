@@ -8,7 +8,7 @@ function register($nim, $username, $fullname, $email, $password, $ktm)
   if (strlen($nim) < 10) {
     return [
       "status" => false,
-      "message" => "NIM harus 10 karakter"
+      "message" => "NIM must be 10 characters"
     ];
   }
 
@@ -17,7 +17,7 @@ function register($nim, $username, $fullname, $email, $password, $ktm)
   if ($result->num_rows > 0) {
     return [
       "status" => false,
-      "message" => "NIM sudah terdaftar"
+      "message" => "NIM already exists"
     ];
   }
 
@@ -26,7 +26,7 @@ function register($nim, $username, $fullname, $email, $password, $ktm)
   if ($result->num_rows > 0) {
     return [
       "status" => false,
-      "message" => "Username sudah terdaftar"
+      "message" => "Username already exists"
     ];
   }
 
@@ -35,7 +35,7 @@ function register($nim, $username, $fullname, $email, $password, $ktm)
   if ($result->num_rows > 0) {
     return [
       "status" => false,
-      "message" => "Nama lengkap sudah terdaftar"
+      "message" => "Fullname already exists"
     ];
   }
 
@@ -44,14 +44,14 @@ function register($nim, $username, $fullname, $email, $password, $ktm)
   if ($result->num_rows > 0) {
     return [
       "status" => false,
-      "message" => "Email sudah terdaftar"
+      "message" => "Email already exists"
     ];
   }
 
   if (strlen($password) < 4) {
     return [
       "status" => false,
-      "message" => "Password minimal 4 karakter"
+      "message" => "Password must be at least 4 characters"
     ];
   }
 
@@ -60,7 +60,7 @@ function register($nim, $username, $fullname, $email, $password, $ktm)
   if (empty($ktm['name'])) {
     return [
       "status" => false,
-      "message" => "KTM harus diupload"
+      "message" => "KTM must be uploaded"
     ];
   }
 
@@ -83,7 +83,7 @@ function register($nim, $username, $fullname, $email, $password, $ktm)
     if (!move_uploaded_file($ktm['tmp_name'], $ktmPath)) {
       return [
         "status" => false,
-        "message" => "Gagal mengupload KTM"
+        "message" => "Failed to upload KTM"
       ];
     }
   }
@@ -94,12 +94,12 @@ function register($nim, $username, $fullname, $email, $password, $ktm)
   if ($result) {
     return [
       "status" => true,
-      "message" => "Registrasi berhasil"
+      "message" => "Registration successful"
     ];
   } else {
     return [
       "status" => false,
-      "message" => "Registrasi gagal"
+      "message" => "Registration failed"
     ];
   }
 }
@@ -113,7 +113,7 @@ function login($nim, $password)
   if ($result->num_rows == 0) {
     return [
       "status" => false,
-      "message" => "NIM tidak terdaftar"
+      "message" => "NIM not found"
     ];
   }
 
@@ -122,20 +122,20 @@ function login($nim, $password)
   if (!password_verify($password, $user['password'])) {
     return [
       "status" => false,
-      "message" => "Password salah"
+      "message" => "Incorrect password"
     ];
   }
 
   if (!$user['status']) {
     return [
       "status" => false,
-      "message" => "Akun belum aktif"
+      "message" => "Account not active"
     ];
   }
 
   return [
     "status" => true,
-    "message" => "Login berhasil",
+    "message" => "Login successful",
     "data" => [
       "nim" => $user['nim'],
       "username" => $user['username'],
@@ -159,7 +159,7 @@ function checkValidPhoto($imgFile)
   if ($imgFile['size'] > $maxSize) {
     return [
       "status" => false,
-      "message" => "Ukuran file maksimal 2MB"
+      "message" => "File size exceeds the maximum allowed size of 2 MB"
     ];
   }
 
@@ -205,12 +205,12 @@ function updateStatusUser($nim)
   if ($result) {
     return [
       "status" => true,
-      "message" => "User berhasil diaktifkan"
+      "message" => "User enabled successfully"
     ];
   } else {
     return [
       "status" => false,
-      "message" => "User gagal diaktifkan"
+      "message" => "User failed to enable"
     ];
   }
 }
@@ -224,12 +224,12 @@ function rejectStatusUser($nim)
   if ($result) {
     return [
       "status" => true,
-      "message" => "User berhasil ditolak"
+      "message" => "User rejected successfully"
     ];
   } else {
     return [
       "status" => false,
-      "message" => "User gagal ditolak"
+      "message" => "User failed to reject"
     ];
   }
 }
@@ -243,12 +243,12 @@ function deleteUser($nim)
   if ($result) {
     return [
       "status" => true,
-      "message" => "User berhasil dihapus"
+      "message" => "User deleted successfully"
     ];
   } else {
     return [
       "status" => false,
-      "message" => "User gagal dihapus"
+      "message" => "User failed to delete"
     ];
   }
 }
@@ -326,7 +326,7 @@ function addPost($userNIM, $title, $description, $category, $photo = null)
     if (!move_uploaded_file($photo['tmp_name'], $photoPath)) {
       return [
         "status" => false,
-        "message" => "Gagal mengupload foto"
+        "message" => "Failed to upload photo"
       ];
     }
   }
@@ -336,12 +336,12 @@ function addPost($userNIM, $title, $description, $category, $photo = null)
   if ($result) {
     return [
       "status" => true,
-      "message" => "Post berhasil ditambahkan, menunggu verifikasi admin!"
+      "message" => "Post added successfully, please wait for admin approval!"
     ];
   } else {
     return [
       "status" => false,
-      "message" => "Post gagal ditambahkan!"
+      "message" => "Post failed to add!"
     ];
   }
 }
@@ -401,12 +401,12 @@ function approvePost($id)
   if ($result) {
     return [
       "status" => true,
-      "message" => "Post berhasil diapprove"
+      "message" => "Post approved successfully"
     ];
   } else {
     return [
       "status" => false,
-      "message" => "Post gagal diapprove"
+      "message" => "Post failed to approve"
     ];
   }
 }
@@ -420,12 +420,12 @@ function rejectPost($id)
   if ($result) {
     return [
       "status" => true,
-      "message" => "Post berhasil direject"
+      "message" => "Post rejected successfully"
     ];
   } else {
     return [
       "status" => false,
-      "message" => "Post gagal direject"
+      "message" => "Post failed to reject"
     ];
   }
 }
@@ -439,12 +439,12 @@ function deletePost($id)
   if ($result) {
     return [
       "status" => true,
-      "message" => "Post berhasil dihapus"
+      "message" => "Post deleted successfully"
     ];
   } else {
     return [
       "status" => false,
-      "message" => "Post gagal dihapus"
+      "message" => "Post failed to delete"
     ];
   }
 }
